@@ -8,8 +8,9 @@ namespace Components
     //This gate implements the or operation. To implement it, follow the example in the And gate.
     class OrGate : TwoInputGate
     {
-        //we will use a * and a * after it
+        //we will use 2 nots and a nand after it
         private NotGate m_gNot;
+        private NotGate m_gNot1;
         private NAndGate m_gNand;
 
         public OrGate()
@@ -17,12 +18,16 @@ namespace Components
             //init the gates
             m_gNand = new NAndGate();
             m_gNot = new NotGate();
-            //wire the output of the nand gate to the input of the not
-            m_gNot.ConnectInput(m_gNand.Output);
-            //set the inputs and the output of the and gate
-            Output = m_gNot.Output;
-            Input1 = m_gNand.Input1;
-            Input2 = m_gNand.Input2;
+            m_gNot1 = new NotGate();
+            
+            //wire the output of the nots gates to the input of the nand
+            m_gNand.ConnectInput1(m_gNot.Output);
+            m_gNand.ConnectInput2(m_gNot1.Output);
+            
+            //set the inputs and the output of the or gate
+            Output = m_gNand.Output;
+            Input1 = m_gNot.Input;
+            Input2 = m_gNot1.Input;
         }
 
 

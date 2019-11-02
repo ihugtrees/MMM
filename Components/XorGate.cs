@@ -8,18 +8,24 @@ namespace Components
     //This gate implements the xor operation. To implement it, follow the example in the And gate.
     class XorGate : TwoInputGate
     {
-        //we will use a * and a * after it
-        private NotGate m_gNot;
+        
         private NAndGate m_gNand;
+        private AndGate m_gAnd;
+        private OrGate m_gOr;
+        
         public XorGate()
         {
             //init the gates
             m_gNand = new NAndGate();
-            m_gNot = new NotGate();
-            //wire the output of the nand gate to the input of the not
-            m_gNot.ConnectInput(m_gNand.Output);
-            //set the inputs and the output of the and gate
-            Output = m_gNot.Output;
+            m_gAnd = new AndGate();
+            m_gOr = new OrGate();
+            
+            m_gAnd.ConnectInput1(m_gOr.Output);
+            m_gAnd.ConnectInput2(m_gNand.Output);
+            m_gOr.ConnectInput1(m_gNand.Input1);
+            m_gOr.ConnectInput2(m_gNand.Input2);
+            
+            Output = m_gAnd.Output;
             Input1 = m_gNand.Input1;
             Input2 = m_gNand.Input2;
         }
@@ -50,7 +56,7 @@ namespace Components
                 return false;
             Input1.Value = 1;
             Input2.Value = 1;
-            if (Output.Value != 1)
+            if (Output.Value != 0)
                 return false;
             return true;
         }

@@ -17,8 +17,10 @@ namespace Components
             //init the gates
             m_gNand = new NAndGate();
             m_gNot = new NotGate();
+            
             //wire the output of the nand gate to the input of the not
             m_gNot.ConnectInput(m_gNand.Output);
+            
             //set the inputs and the output of the and gate
             Output = m_gNot.Output;
             Input1 = m_gNand.Input1;

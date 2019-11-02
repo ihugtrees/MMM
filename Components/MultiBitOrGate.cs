@@ -20,7 +20,10 @@ namespace Components
 
         public override bool TestGate()
         {
-            throw new NotImplementedException();
+            for (var i = 0; i < m_wsInput.Size; i++)
+                if (m_wsInput[i].Value == 1)
+                    return true;
+            return false;
         }
     }
 }
