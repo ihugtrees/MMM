@@ -13,21 +13,28 @@ namespace Components
 
             //Create and gate
             AndGate and = new AndGate();
-            //Test that the unit testing works properly
             if (!and.TestGate())
                 Console.WriteLine("and bug");
-            
-            //Create or gate
-            OrGate or= new OrGate();
-            //Test that the unit testing works properly
-            if (!or.TestGate())
-                Console.WriteLine("or bug");
-            
-            //Create xor gate
-            XorGate xor= new XorGate();
-            //Test that the unit testing works properly
-            if (!xor.TestGate())
-                Console.WriteLine("xor bug");
+
+//            //Create or gate
+//            OrGate or = new OrGate();
+//            if (!or.TestGate())
+//                Console.WriteLine("or bug");
+//
+//            //Create xor gate
+//            XorGate xor = new XorGate();
+//            if (!xor.TestGate())
+//                Console.WriteLine("xor bug");
+//
+//            //Create MultiBitAndGate gate
+//            MultiBitAndGate multiBitAndGate = new MultiBitAndGate(3);
+//            if (!multiBitAndGate.TestGate())
+//                Console.WriteLine("MultiBitAndGate bug");
+
+            //Create MultiBitOrGate gate
+            MultiBitOrGate multiBitOrGate = new MultiBitOrGate(3);
+            if (!multiBitOrGate.TestGate())
+                Console.WriteLine("MultiBitOrGate bug");
 
             //Now we ruin the nand gates that are used in all other gates. The gate should not work properly after this.
             NAndGate.Corrupt = true;
