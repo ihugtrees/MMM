@@ -25,11 +25,11 @@ namespace Components
 //            XorGate xor = new XorGate();
 //            if (!xor.TestGate())
 //                Console.WriteLine("xor bug");
-//
-//            //Create MultiBitAndGate gate
-//            MultiBitAndGate multiBitAndGate = new MultiBitAndGate(3);
-//            if (!multiBitAndGate.TestGate())
-//                Console.WriteLine("MultiBitAndGate bug");
+
+            //Create MultiBitAndGate gate
+            MultiBitAndGate multiBitAndGate = new MultiBitAndGate(3);
+            if (!multiBitAndGate.TestGate())
+                Console.WriteLine("MultiBitAndGate bug");
 
             //Create MultiBitOrGate gate
             MultiBitOrGate multiBitOrGate = new MultiBitOrGate(3);

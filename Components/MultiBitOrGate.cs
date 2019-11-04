@@ -10,7 +10,7 @@ namespace Components
     class MultiBitOrGate : MultiBitGate
     {
         private OrGate[] orGates;
-        
+
         public MultiBitOrGate(int iInputCount)
             : base(iInputCount)
         {
@@ -18,17 +18,15 @@ namespace Components
             for (int i = 0; i < orGates.Length; i++)
                 orGates[i] = new OrGate();
 
-            m_wsInput[0].ConnectInput(orGates[0].Input1);
+            orGates[0].ConnectInput1(m_wsInput[0]);
 
             for (var i = 1; i < orGates.Length; i++)
             {
-                orGates[i].Input1.ConnectInput(orGates[i - 1].Output);
-                m_wsInput[i].ConnectInput(orGates[i - 1].Input2);
+                orGates[i].ConnectInput1(orGates[i - 1].Output);
+                orGates[i - 1].ConnectInput2(m_wsInput[i]);
             }
-
-            m_wsInput[iInputCount - 1].ConnectInput(orGates[iInputCount - 2].Input2);
+            orGates[iInputCount - 2].ConnectInput2(m_wsInput[iInputCount - 1]);
             Output = orGates[iInputCount - 2].Output;
-
         }
 
         public override bool TestGate()

@@ -17,15 +17,14 @@ namespace Components
             for (int i = 0; i < andGates.Length; i++)
                 andGates[i] = new AndGate();
 
-            m_wsInput[0].ConnectInput(andGates[0].Input1);
+            andGates[0].ConnectInput1(m_wsInput[0]);
 
             for (var i = 1; i < andGates.Length; i++)
             {
-                andGates[i].Input1.ConnectInput(andGates[i - 1].Output);
-                m_wsInput[i].ConnectInput(andGates[i - 1].Input2);
+                andGates[i].ConnectInput1(andGates[i - 1].Output);
+                andGates[i - 1].ConnectInput2(m_wsInput[i]);
             }
-
-            m_wsInput[iInputCount - 1].ConnectInput(andGates[iInputCount - 2].Input2);
+            andGates[iInputCount - 2].ConnectInput2(m_wsInput[iInputCount - 1]);
             Output = andGates[iInputCount - 2].Output;
         }
 
