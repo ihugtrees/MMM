@@ -10,19 +10,17 @@ namespace Components
     {
         //Word size - number of bits in the register
         public int Size { get; private set; }
-        
+
         public bool InputConected { get; private set; }
 
         //An indexer providing access to a single wire in the wireset
         public Wire this[int i]
         {
-            get
-            {
-                return m_aWires[i];
-            }
+            get { return m_aWires[i]; }
         }
+
         private Wire[] m_aWires;
-        
+
         public WireSet(int iSize)
         {
             Size = iSize;
@@ -31,6 +29,7 @@ namespace Components
             for (int i = 0; i < m_aWires.Length; i++)
                 m_aWires[i] = new Wire();
         }
+
         public override string ToString()
         {
             string s = "[";
@@ -43,7 +42,14 @@ namespace Components
         //Transform a positive integer value into binary and set the wires accordingly, with 0 being the LSB
         public void SetValue(int iValue)
         {
-            throw new NotImplementedException();
+            int inputIndex = 0;
+
+            while (iValue != 0)
+            {
+                m_aWires[inputIndex].Value = iValue % 2;
+                iValue /= 2;
+                inputIndex++;
+            }
         }
 
         //Transform the binary code into a positive integer
@@ -68,14 +74,12 @@ namespace Components
         {
             if (InputConected)
                 throw new InvalidOperationException("Cannot connect a wire to more than one inputs");
-            if(wIn.Size != Size)
+            if (wIn.Size != Size)
                 throw new InvalidOperationException("Cannot connect two wiresets of different sizes.");
             for (int i = 0; i < m_aWires.Length; i++)
                 m_aWires[i].ConnectInput(wIn[i]);
 
             InputConected = true;
-            
         }
-
     }
 }

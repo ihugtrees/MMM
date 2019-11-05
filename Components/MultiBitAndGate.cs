@@ -24,6 +24,7 @@ namespace Components
                 andGates[i].ConnectInput1(andGates[i - 1].Output);
                 andGates[i - 1].ConnectInput2(m_wsInput[i]);
             }
+
             andGates[iInputCount - 2].ConnectInput2(m_wsInput[iInputCount - 1]);
             Output = andGates[iInputCount - 2].Output;
         }
@@ -33,20 +34,10 @@ namespace Components
         {
             for (var i = 0; i < Math.Pow(2, m_wsInput.Size); i++)
             {
-                int inputIndex = m_wsInput.Size - 1;
-                int inputValue = i;
-
-                while (inputValue != 0)
-                {
-                    m_wsInput[inputIndex].Value = inputValue % 2;
-                    inputValue /= 2;
-                    inputIndex--;
-                }
-
-                for (int j = 0; j < m_wsInput.Size; j++)
-                    if (m_wsInput[j].Value == 0)
-                        if (Output.Value != 0)
-                            return false;
+                m_wsInput.SetValue(i);
+                foreach (var andGate in andGates)
+                    if ((andGate.Input1.Value == 0 || andGate.Input2.Value == 0) && andGate.Output.Value != 0)
+                        return false;
             }
 
             return true;

@@ -27,7 +27,7 @@ namespace Components
 //                Console.WriteLine("xor bug");
 
             //Create MultiBitAndGate gate
-            MultiBitAndGate multiBitAndGate = new MultiBitAndGate(3);
+            MultiBitAndGate multiBitAndGate = new MultiBitAndGate(5);
             if (!multiBitAndGate.TestGate())
                 Console.WriteLine("MultiBitAndGate bug");
 

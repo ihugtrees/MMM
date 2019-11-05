@@ -25,6 +25,7 @@ namespace Components
                 orGates[i].ConnectInput1(orGates[i - 1].Output);
                 orGates[i - 1].ConnectInput2(m_wsInput[i]);
             }
+
             orGates[iInputCount - 2].ConnectInput2(m_wsInput[iInputCount - 1]);
             Output = orGates[iInputCount - 2].Output;
         }
@@ -33,20 +34,10 @@ namespace Components
         {
             for (var i = 0; i < Math.Pow(2, m_wsInput.Size); i++)
             {
-                int inputIndex = m_wsInput.Size - 1;
-                int inputValue = i;
-
-                while (inputValue != 0)
-                {
-                    m_wsInput[inputIndex].Value = inputValue % 2;
-                    inputValue /= 2;
-                    inputIndex--;
-                }
-
-                for (int j = 0; j < m_wsInput.Size; j++)
-                    if (m_wsInput[j].Value == 1)
-                        if (Output.Value != 1)
-                            return false;
+                m_wsInput.SetValue(i);
+                foreach (var orGate in orGates)
+                    if ((orGate.Input1.Value == 1 || orGate.Input2.Value == 1) && orGate.Output.Value != 1)
+                        return false;
             }
 
             return true;
