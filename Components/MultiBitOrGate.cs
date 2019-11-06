@@ -37,22 +37,22 @@ namespace Components
 //                m_wsInput.SetValue(i);
 //            }
 
-            bool one = false;
-
             for (int j = 0; j < m_wsInput.Size; j++)
             {
-                if (m_wsInput[j].Value == 1)
-                {
-                    one = true;
-                    break;
-                }
+                m_wsInput[j].Value = 0;
             }
 
-            if (one && Output.Value == 0)
+            if (Output.Value != 0)
+            {
                 return false;
+            }
 
-            if (!one && Output.Value == 1)
+            m_wsInput[0].Value = 1;
+            
+            if (Output.Value != 1)
+            {
                 return false;
+            }
 
             return true;
         }
