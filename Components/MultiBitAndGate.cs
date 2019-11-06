@@ -32,13 +32,27 @@ namespace Components
 
         public override bool TestGate()
         {
-            for (var i = 0; i < Math.Pow(2, m_wsInput.Size); i++)
+//            for (var i = 0; i < Math.Pow(2, m_wsInput.Size); i++)
+//            {
+//                m_wsInput.SetValue(i);
+//            }
+
+            bool zero = false;
+
+            for (int j = 0; j < m_wsInput.Size; j++)
             {
-                m_wsInput.SetValue(i);
-                foreach (var andGate in andGates)
-                    if ((andGate.Input1.Value == 0 || andGate.Input2.Value == 0) && andGate.Output.Value != 0)
-                        return false;
+                if (m_wsInput[j].Value == 0)
+                {
+                    zero = true;
+                    break;
+                }
             }
+
+            if (zero && Output.Value == 1)
+                return false;
+
+            if (!zero && Output.Value == 0)
+                return false;
 
             return true;
         }

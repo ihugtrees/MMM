@@ -27,9 +27,9 @@ namespace Components
 //                Console.WriteLine("xor bug");
 
             //Create MultiBitAndGate gate
-            MultiBitAndGate multiBitAndGate = new MultiBitAndGate(5);
-            if (!multiBitAndGate.TestGate())
-                Console.WriteLine("MultiBitAndGate bug");
+            MultiBitAndGate multiBitAndGate = new MultiBitAndGate(3);
+           // if (!multiBitAndGate.TestGate())
+           //     Console.WriteLine("MultiBitAndGate bug");
 
             //Create MultiBitOrGate gate
             MultiBitOrGate multiBitOrGate = new MultiBitOrGate(3);
@@ -40,6 +40,12 @@ namespace Components
             NAndGate.Corrupt = true;
             if (and.TestGate())
                 Console.WriteLine("bugbug");
+            
+            if (multiBitAndGate.TestGate())
+                Console.WriteLine("MultiBitAndGate bug");
+
+            if (multiBitOrGate.TestGate())
+                Console.WriteLine("MultiBitOrGate bug");
 
 
             Console.WriteLine("done");
