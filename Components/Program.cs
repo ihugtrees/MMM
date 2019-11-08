@@ -16,37 +16,50 @@ namespace Components
             if (!and.TestGate())
                 Console.WriteLine("and bug");
 
-//            //Create or gate
-//            OrGate or = new OrGate();
-//            if (!or.TestGate())
-//                Console.WriteLine("or bug");
-//
-//            //Create xor gate
-//            XorGate xor = new XorGate();
-//            if (!xor.TestGate())
-//                Console.WriteLine("xor bug");
-
             //Create MultiBitAndGate gate
             MultiBitAndGate multiBitAndGate = new MultiBitAndGate(3);
-           // if (!multiBitAndGate.TestGate())
-           //     Console.WriteLine("MultiBitAndGate bug");
+            if (!multiBitAndGate.TestGate())
+                Console.WriteLine("MultiBitAndGate bug");
 
-            //Create MultiBitOrGate gate
-            MultiBitOrGate multiBitOrGate = new MultiBitOrGate(3);
-            if (!multiBitOrGate.TestGate())
-                Console.WriteLine("MultiBitOrGate bug");
+            MuxGate mux = new MuxGate();
+            if (!mux.TestGate())
+                Console.WriteLine("mux bug");
+
+            Demux demux = new Demux();
+            if (!demux.TestGate())
+                Console.WriteLine("mux bug");
+            
+            BitwiseNotGate bitNot= new BitwiseNotGate(2);
+            if (!bitNot.TestGate())
+                Console.WriteLine("bitNot bug");
+            
+            BitwiseAndGate bitAnd= new BitwiseAndGate(2);
+            if (!bitAnd.TestGate())
+                Console.WriteLine("bitAnd bug");
+            
+            BitwiseOrGate bitOr= new BitwiseOrGate(2);
+            if (!bitOr.TestGate())
+                Console.WriteLine("bitOr bug");
 
             //Now we ruin the nand gates that are used in all other gates. The gate should not work properly after this.
             NAndGate.Corrupt = true;
             if (and.TestGate())
-                Console.WriteLine("bugbug");
-            
+                Console.WriteLine("and corr bug");
+
             if (multiBitAndGate.TestGate())
-                Console.WriteLine("MultiBitAndGate bug");
+                Console.WriteLine("MultiBitAndGate corr bug");
 
-            if (multiBitOrGate.TestGate())
-                Console.WriteLine("MultiBitOrGate bug");
+            if (mux.TestGate())
+                Console.WriteLine("mux corr bug");
 
+            if (demux.TestGate())
+                Console.WriteLine("demux corr bug");
+            
+            if (bitAnd.TestGate())
+                Console.WriteLine("bitAnd corr bug");
+            
+            if (bitOr.TestGate())
+                Console.WriteLine("bitOr corr bug");
 
             Console.WriteLine("done");
             //Console.ReadLine();
