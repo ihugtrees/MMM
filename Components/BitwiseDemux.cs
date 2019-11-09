@@ -14,21 +14,32 @@ namespace Components
         public WireSet Input { get; private set; }
         public Wire Control { get; private set; }
 
-        //your code here
+        private Demux[] demuxs;
 
         public BitwiseDemux(int iSize)
         {
             Size = iSize;
             Control = new Wire();
             Input = new WireSet(Size);
+            Output1 = new WireSet(iSize);
+            Output2 = new WireSet(iSize);
 
-            //your code here
+            demuxs = new Demux[iSize];
+            for (int i = 0; i < iSize; i++)
+            {
+                demuxs[i] = new Demux();
+                demuxs[i].ConnectInput(Input[i]);
+                demuxs[i].ConnectControl(Control);
+                Output1[i].ConnectInput(demuxs[i].Output1);
+                Output2[i].ConnectInput(demuxs[i].Output2);
+            }
         }
 
         public void ConnectControl(Wire wControl)
         {
             Control.ConnectInput(wControl);
         }
+
         public void ConnectInput(WireSet wsInput)
         {
             Input.ConnectInput(wsInput);
@@ -36,7 +47,24 @@ namespace Components
 
         public override bool TestGate()
         {
-            throw new NotImplementedException();
+            for (int i = 0; i < Math.Pow(2, Input.Size); i++)
+            {
+                Input.SetValue(i);
+
+                Control.Value = 0;
+
+                for (int k = 0; k < Input.Size; k++)
+                    if (Output1[k].Value != Input[k].Value)
+                        return false;
+
+                Control.Value = 1;
+
+                for (int k = 0; k < Input.Size; k++)
+                    if (Output2[k].Value != Input[k].Value)
+                        return false;
+            }
+
+            return true;
         }
     }
 }

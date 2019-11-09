@@ -19,7 +19,7 @@ namespace Components
         public MuxGate()
         {
             ControlInput = new Wire();
-            
+
             and1 = new AndGate();
             and2 = new AndGate();
             not = new NotGate();
@@ -31,7 +31,7 @@ namespace Components
 
             and2.ConnectInput1(Input2);
             and2.ConnectInput2(ControlInput);
-            
+
             or.ConnectInput1(and1.Output);
             or.ConnectInput2(and2.Output);
 
@@ -60,9 +60,7 @@ namespace Components
                 Input2.Value = theValue / 2;
 
                 if (Output.Value != Input1.Value)
-                {
                     return false;
-                }
             }
 
             ControlInput.Value = 1;

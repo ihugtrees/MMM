@@ -19,7 +19,13 @@ namespace Components
 
             muxs = new MuxGate[iSize];
             for (int i = 0; i < iSize; i++)
+            {
                 muxs[i] = new MuxGate();
+                muxs[i].ConnectInput1(Input1[i]);
+                muxs[i].ConnectInput2(Input2[i]);
+                muxs[i].ConnectControl(ControlInput);
+                Output[i].ConnectInput(muxs[i].Output);
+            }
         }
 
         public void ConnectControl(Wire wControl)
@@ -36,18 +42,26 @@ namespace Components
 
         public override bool TestGate()
         {
-            ControlInput.Value = 0;
-            for (int i = 0; i < Input1.Size; i++)
+            for (int i = 0; i < Math.Pow(2, Input1.Size); i++)
             {
-                if (Output[i].Value != Input1[i].Value)
-                    return false;
-            }
-            
-            ControlInput.Value = 1;
-            for (int i = 0; i < Input1.Size; i++)
-            {
-                if (Output[i].Value != Input2[i].Value)
-                    return false;
+                Input1.SetValue(i);
+
+                for (int j = 0; j < Math.Pow(2, Input1.Size); j++)
+                {
+                    Input2.SetValue(j);
+
+                    ControlInput.Value = 0;
+
+                    for (int k = 0; k < Input1.Size; k++)
+                        if (Output[k].Value != Input1[k].Value)
+                            return false;
+
+                    ControlInput.Value = 1;
+
+                    for (int k = 0; k < Input1.Size; k++)
+                        if (Output[k].Value != Input2[k].Value)
+                            return false;
+                }
             }
 
             return true;

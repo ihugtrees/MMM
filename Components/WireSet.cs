@@ -55,19 +55,73 @@ namespace Components
         //Transform the binary code into a positive integer
         public int GetValue()
         {
-            throw new NotImplementedException();
+            int sum = 0;
+            for (int i = 0; i < Size; i++)
+            {
+                sum = sum + (int) (m_aWires[i].Value * Math.Pow(2, i));
+            }
+
+            return sum;
         }
 
         //Transform an integer value into binary using 2`s complement and set the wires accordingly, with 0 being the LSB
         public void Set2sComplement(int iValue)
         {
-            throw new NotImplementedException();
+            if (iValue < 0)
+            {
+                SetValue(iValue * (-1));
+                reverseNumbers(this);
+                add1ToBinary(this);
+
+                m_aWires[Size - 1].Value = 1;
+            }
+            else
+            {
+                SetValue(iValue);
+                m_aWires[Size - 1].Value = 0;
+            }
         }
 
         //Transform the binary code in 2`s complement into an integer
         public int Get2sComplement()
         {
-            throw new NotImplementedException();
+            WireSet newWs = new WireSet(Size - 1);
+
+            for (int i = 0; i < Size - 1; i++)
+                newWs[i].Value = m_aWires[i].Value;
+
+            if (m_aWires[Size - 1].Value == 1)
+            {
+                reverseNumbers(newWs);
+                add1ToBinary(newWs);
+            }
+
+            return newWs.GetValue();
+        }
+
+        private void reverseNumbers(WireSet wireSet)
+        {
+            for (int i = 0; i < Size; i++)
+            {
+                if (wireSet[i].Value == 0)
+                    wireSet[i].Value = 1;
+                else
+                    wireSet[i].Value = 0;
+            }
+        }
+
+        private void add1ToBinary(WireSet wireSet)
+        {
+            wireSet[0].Value += 1;
+            for (int i = 0; i < wireSet.Size; i++)
+            {
+                if (wireSet[i].Value == 2)
+                {
+                    wireSet[i].Value = 0;
+                    if (i < wireSet.Size - 1)
+                        wireSet[i + 1].Value += 1;
+                }
+            }
         }
 
         public void ConnectInput(WireSet wIn)

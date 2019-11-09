@@ -28,18 +28,26 @@ namespace Components
             Demux demux = new Demux();
             if (!demux.TestGate())
                 Console.WriteLine("mux bug");
-            
-            BitwiseNotGate bitNot= new BitwiseNotGate(2);
+
+            BitwiseNotGate bitNot = new BitwiseNotGate(2);
             if (!bitNot.TestGate())
                 Console.WriteLine("bitNot bug");
-            
-            BitwiseAndGate bitAnd= new BitwiseAndGate(2);
+
+            BitwiseAndGate bitAnd = new BitwiseAndGate(2);
             if (!bitAnd.TestGate())
                 Console.WriteLine("bitAnd bug");
-            
-            BitwiseOrGate bitOr= new BitwiseOrGate(2);
+
+            BitwiseOrGate bitOr = new BitwiseOrGate(2);
             if (!bitOr.TestGate())
                 Console.WriteLine("bitOr bug");
+
+            BitwiseMux bitMux = new BitwiseMux(2);
+            if (!bitMux.TestGate())
+                Console.WriteLine("bitMux bug");
+
+            BitwiseDemux bitDemux = new BitwiseDemux(2);
+            if (!bitDemux.TestGate())
+                Console.WriteLine("bitDemux bug");
 
             //Now we ruin the nand gates that are used in all other gates. The gate should not work properly after this.
             NAndGate.Corrupt = true;
@@ -54,12 +62,18 @@ namespace Components
 
             if (demux.TestGate())
                 Console.WriteLine("demux corr bug");
-            
+
             if (bitAnd.TestGate())
                 Console.WriteLine("bitAnd corr bug");
-            
+
             if (bitOr.TestGate())
                 Console.WriteLine("bitOr corr bug");
+
+            if (bitMux.TestGate())
+                Console.WriteLine("bitMux corr bug");
+            
+            if (bitDemux.TestGate())
+                Console.WriteLine("bitDemux bug");
 
             Console.WriteLine("done");
             //Console.ReadLine();

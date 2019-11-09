@@ -19,23 +19,47 @@ namespace Components
         public WireSet Control { get; private set; }
         public WireSet[] Inputs { get; private set; }
 
-        //your code here
+        private BitwiseMux[] muxes;
 
         public BitwiseMultiwayMux(int iSize, int cControlBits)
         {
+            int numOfInputs = (int) Math.Pow(2, cControlBits);
             Size = iSize;
             Output = new WireSet(Size);
             Control = new WireSet(cControlBits);
-            Inputs = new WireSet[(int)Math.Pow(2, cControlBits)];
-            
-            for (int i = 0; i < Inputs.Length; i++)
+            Inputs = new WireSet[numOfInputs];
+            muxes = new BitwiseMux[numOfInputs - 1];
+
+
+            for (int i = 0; i < numOfInputs; i++)
             {
                 Inputs[i] = new WireSet(Size);
-                
+            }
+
+            for (int i = 0; i < numOfInputs - 1; i++)
+                muxes[i] = new BitwiseMux(iSize);
+
+            for (int i = 0; i < cControlBits - 1; i++)
+            {
+                for (int j = (int) Math.Pow(2, i) - 1; j < Math.Pow(2, i + 1) - 1; j++)
+                {
+                    muxes[j].ConnectInput1(muxes[j * 2 + 1].Output);
+                    muxes[j].ConnectInput2(muxes[j * 2 + 2].Output);
+                    muxes[j].ConnectControl(Control[i]);
+                }
+            }
+
+            int inputIndex = 0;
+            for (int i = (int) Math.Pow(2, cControlBits - 1) - 1; i < Math.Pow(2, cControlBits) - 1; i++)
+            {
+                muxes[i].ConnectInput1(Inputs[inputIndex]);
+                inputIndex++;
+                muxes[i].ConnectInput2(Inputs[inputIndex]);
+                inputIndex++;
+                muxes[i].ConnectControl(Control[cControlBits-1]);
             }
             
-            //your code here
-
+            Output.ConnectInput(muxes[0].Output);
         }
 
 
@@ -43,11 +67,11 @@ namespace Components
         {
             Inputs[i].ConnectInput(wsInput);
         }
+
         public void ConnectControl(WireSet wsControl)
         {
             Control.ConnectInput(wsControl);
         }
-
 
 
         public override bool TestGate()
