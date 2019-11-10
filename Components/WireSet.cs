@@ -42,13 +42,10 @@ namespace Components
         //Transform a positive integer value into binary and set the wires accordingly, with 0 being the LSB
         public void SetValue(int iValue)
         {
-            int inputIndex = 0;
-
-            while (iValue != 0)
+            for (int i = 0; i < Size; i++)
             {
-                m_aWires[inputIndex].Value = iValue % 2;
+                m_aWires[i].Value = iValue % 2;
                 iValue /= 2;
-                inputIndex++;
             }
         }
 
@@ -101,7 +98,7 @@ namespace Components
 
         private void reverseNumbers(WireSet wireSet)
         {
-            for (int i = 0; i < Size; i++)
+            for (int i = 0; i < wireSet.Size; i++)
             {
                 if (wireSet[i].Value == 0)
                     wireSet[i].Value = 1;
