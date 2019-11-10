@@ -91,6 +91,7 @@ namespace Components
             {
                 reverseNumbers(newWs);
                 add1ToBinary(newWs);
+                return newWs.GetValue() * (-1);
             }
 
             return newWs.GetValue();
@@ -109,15 +110,16 @@ namespace Components
 
         private void add1ToBinary(WireSet wireSet)
         {
-            wireSet[0].Value += 1;
             for (int i = 0; i < wireSet.Size; i++)
             {
-                if (wireSet[i].Value == 2)
+                if (wireSet[i].Value == 0)
                 {
-                    wireSet[i].Value = 0;
-                    if (i < wireSet.Size - 1)
-                        wireSet[i + 1].Value += 1;
+                    wireSet[i].Value = 1;
+                    break;
                 }
+
+                if (wireSet[i].Value == 1)
+                    wireSet[i].Value = 0;
             }
         }
 
