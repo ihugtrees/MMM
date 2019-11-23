@@ -19,7 +19,6 @@ namespace Components
         public int Size { get; private set; }
 
         private SingleBitRegister[] BitRegisters;
-        private WireSet prevInput;
 
 
         public MultiBitRegister(int iSize)
@@ -28,7 +27,6 @@ namespace Components
             Input = new WireSet(Size);
             Output = new WireSet(Size);
             Load = new Wire();
-            prevInput = new WireSet(Size);
 
             BitRegisters = new SingleBitRegister[Size];
             for (int i = 0; i < Size; i++)
@@ -59,25 +57,29 @@ namespace Components
 
         public override bool TestGate()
         {
-            for (int i = 1; i > 0; i--)
+            for (int i = 1; i >= 0; i--)
             {
                 Load.Value = i;
-                for (int j = 1; j < Math.Pow(2, Size); j++)
+                for (int j = 0; j < Math.Pow(2, Size); j++)
                 {
                     Input.SetValue(j);
-                    prevInput.SetValue(j - 1);
+                    int lastOut = Output.GetValue();
+                    Clock.ClockDown();
+                    Clock.ClockUp();
 
-                    Console.WriteLine("Load: " + Load);
-                    Console.WriteLine("Input: " + Input);
-                    Console.WriteLine("prevInput: " + prevInput);
-                    Console.WriteLine("Output: " + Output);
 
-                    if (Load.Value == 1 && prevInput.GetValue() != Input.GetValue())
+//                    Console.WriteLine("Load: " + Load);
+//                    Console.WriteLine("Input: " + Input);
+//                    Console.WriteLine("Output: " + Output);
+//                    Console.WriteLine("lastOut: " + lastOut);
+//                    Console.WriteLine();
+
+                    if (Load.Value == 1 && Input.GetValue() != Output.GetValue())
                     {
                         return false;
                     }
 
-                    if (Load.Value == 0 && Output.GetValue() != Math.Pow(2, Size) - 1)
+                    if (Load.Value == 0 && Output.GetValue() != lastOut && Input.GetValue() != lastOut)
                     {
                         return false;
                     }

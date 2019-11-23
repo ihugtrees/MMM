@@ -51,8 +51,8 @@ namespace Components
                 for (int j = 0; j < 2; j++)
                 {
                     Input.Value = j;
-                    FlipFlopGate.OnClockDown();
-                    FlipFlopGate.OnClockUp();
+                    Clock.ClockDown();
+                    Clock.ClockUp();
 
                     if (Load.Value == 1 && Output.Value != Input.Value)
                     {

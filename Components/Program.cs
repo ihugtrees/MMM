@@ -19,14 +19,18 @@ namespace Components
 //            MultiBitAdder multiBitAdder = new MultiBitAdder(4);
 //            if (!multiBitAdder.TestGate())
 //                Console.WriteLine("multiBitAdder bug");
+//
+//            SingleBitRegister singleBitRegister = new SingleBitRegister();
+//            if (!singleBitRegister.TestGate())
+//                Console.WriteLine("singleBitRegister bug");
+//
+//            MultiBitRegister multiBitRegister = new MultiBitRegister(3);
+//            if (!multiBitRegister.TestGate())
+//                Console.WriteLine("multiBitRegister bug");
 
-            SingleBitRegister singleBitRegister = new SingleBitRegister();
-            if (!singleBitRegister.TestGate())
-                Console.WriteLine("singleBitRegister bug");
-
-            MultiBitRegister multiBitRegister = new MultiBitRegister(3);
-            if (!multiBitRegister.TestGate())
-                Console.WriteLine("multiBitRegister bug");
+            Memory memory = new Memory(2,2);
+            if (!memory.TestGate())
+                Console.WriteLine("memory bug");
 
             //Now we ruin the nand gates that are used in all other gates. The gate should not work properly after this.
             NAndGate.Corrupt = true;
@@ -35,12 +39,15 @@ namespace Components
 
 //            if (multiBitAdder.TestGate())
 //                Console.WriteLine("multiBitAdder corr bug");
+//
+//            if (singleBitRegister.TestGate())
+//                Console.WriteLine("singleBitRegister corr bug");
+//
+//            if (multiBitRegister.TestGate())
+//                Console.WriteLine("multiBitRegister corr bug");
 
-            if (singleBitRegister.TestGate())
-                Console.WriteLine("singleBitRegister corr bug");
-
-            if (multiBitRegister.TestGate())
-                Console.WriteLine("multiBitRegister corr bug");
+            if (memory.TestGate())
+                Console.WriteLine("memory corr bug");
 
             Console.WriteLine("done");
         }
