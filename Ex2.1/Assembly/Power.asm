@@ -3,9 +3,17 @@
 D=M
 @ZERO
 D;JEQ
+@1
+D=M ;// D=N
+@0
+M=D ;//SUM=N
+@2
+D=M-1 ;//D=M-1
 @I
-M=0
+M=D ;//I=M-1
+(POW_LOOP)
 
+(INNER_LOOP)
 
 
 (ZERO)
