@@ -1,0 +1,16 @@
+(START)
+@2
+D=M
+@ZERO
+D;JEQ
+@I
+M=0
+
+
+
+(ZERO)
+@0
+M=1
+(END)
+@END
+0;JMP
