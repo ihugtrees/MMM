@@ -1,53 +1,36 @@
 (START)
+@1
+A=M
+M=1 //ARR[0]=1
+@ADDER
+M=0 //A=0
+@I
+M=1 //I=1
+D=M
+@1
+D=D+M //I+ARR
+@INDX
+M=D //INDX=ARR+I
+(LOOP)
+@ADDER
+D=M //D=a
+@INDX
+A=M-1
+D=D+M //a+arr[i-1]
+@INDX
+A=M
+M=D //arr[i] = a+arr[i-1]
+@ADDER
+M=D-M //a=arr[i-1]
 @2
 D=M
-@ZERO
-D;JEQ 
-@1
-D=M // D=n
-@0
-M=D ;//SUM=n
-(INIT_POW_LOOP)
-@2
-D=M-1 //D=m-1
 @I
-M=D //I=m-1
-(POW_LOOP)
-@I
-D=M //D=i
-@END
-D;JEQ 
-@0
-D=M //D=SUM
-@TEMP
-M=D //TEMP = SUM;
-(INIT_INNER_LOOP)
-@1
-D=M-1 //D=n-1
-@J
-M=D //J=n-1
-(INNER_LOOP)
-@0
-D=M //D=SUM
-@TEMP
-D=D+M //D=D+TEMP
-@0
-M=D //SUM=D+TEMP
-@J
-M=M-1 //J--
-D=M
-@INNER_LOOP
-D;JGT //iuuuu
-@I
-M=M-1 //I--
-D=M
-@POW_LOOP
+M=M+1
+D=D-M //n-i
+@INDX
+M=M+1
+@LOOP
 D;JGT
-@END
-D;JEQ
-(ZERO)
-@0
-M=1
 (END)
 @END
 0;JMP
