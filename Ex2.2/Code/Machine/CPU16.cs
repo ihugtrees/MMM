@@ -206,6 +206,10 @@ namespace Machine
             m_gJumpMux.Inputs[6][0].ConnectInput(OrJLE.Output);
 
             m_gJumpMux.Inputs[7][0].ConnectInput(JMP7);
+            
+            m_gJumpMux.Control[0].ConnectInput(Instruction[J3]);
+            m_gJumpMux.Control[1].ConnectInput(Instruction[J2]);
+            m_gJumpMux.Control[2].ConnectInput(Instruction[J1]);
 
             //10. connect PC load control
             PCloadAnd = new AndGate();
