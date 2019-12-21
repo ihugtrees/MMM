@@ -14,7 +14,7 @@ namespace Machine
         static void Main(string[] args)
         {
             Machine16 machine = new Machine16(false, true);
-            machine.Code.LoadFromFile(@"D:\Teaching\ECS\Excersises\Ex2\Assembly examples\ScreenExample.hack");
+            machine.Code.LoadFromFile(@"D:\BGU-PC\MMM\MMM\Ex2.2\Assemblyexamples\ScreenExample.hack");
             machine.Data[0] = 100;
             machine.Data[1] = 15;
             DateTime dtStart = DateTime.Now;
@@ -26,7 +26,6 @@ namespace Machine
                 Clock.ClockDown();
                 Clock.ClockUp();
             }
-            
 
             Console.WriteLine("Done " + (DateTime.Now - dtStart).TotalSeconds);
             Console.ReadLine();
