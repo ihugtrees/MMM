@@ -152,7 +152,7 @@ namespace Machine
 
             //7. connect control to MemoryWrite
             MwriteAnd = new AndGate();
-
+            
             MwriteAnd.ConnectInput1(Instruction[Type]);
             MwriteAnd.ConnectInput2(Instruction[D3]);
             MemoryWrite.ConnectInput(MwriteAnd.Output);

@@ -14,12 +14,12 @@ namespace Machine
         static void Main(string[] args)
         {
             Machine16 machine = new Machine16(false, true);
-            machine.Code.LoadFromFile(@"D:\BGU-PC\MMM\MMM\Ex2.2\Assemblyexamples\ScreenExample.hack");
-            machine.Data[0] = 100;
+            machine.Code.LoadFromFile(@"D:\BGU-PC\MMM\MMM\Ex2.2\Assemblyexamples\Copy1To0.hack");
+            machine.Data[0] = 0;
             machine.Data[1] = 15;
             DateTime dtStart = DateTime.Now;
             machine.Reset();
-            for (int i = 0; i < 1000; i++)
+            for (int i = 0; i < 10; i++)
             {
                 machine.CPU.PrintState();
                 Console.WriteLine();
@@ -27,6 +27,7 @@ namespace Machine
                 Clock.ClockUp();
             }
 
+            Console.WriteLine("R0 = "+machine.Data[0]);
             Console.WriteLine("Done " + (DateTime.Now - dtStart).TotalSeconds);
             Console.ReadLine();
         }
