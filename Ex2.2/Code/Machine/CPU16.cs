@@ -74,9 +74,9 @@ namespace Machine
 
             m_gMAMux.ConnectInput1(m_rA.Output);
             m_gMAMux.ConnectInput2(MemoryInput);
-            m_gALU.InputY.ConnectInput(m_gMAMux.Output);
 
             m_gALU.InputX.ConnectInput(m_rD.Output);
+            m_gALU.InputY.ConnectInput(m_gMAMux.Output);
 
             m_rD.ConnectInput(m_gALU.Output);
 
@@ -92,25 +92,31 @@ namespace Machine
         }
 
         //add here components to implement the control unit 
-        private BitwiseMultiwayMux
-            m_gJumpMux; //an example of a control unit component - a mux that controls whether a jump is made
+        private BitwiseMultiwayMux m_gJumpMux; //an example of a control unit component - a mux that controls whether a jump is made
 
         private AndGate DloadAnd;
         private AndGate MwriteAnd;
         private OrGate AwriteOr;
         private NotGate AwriteNot;
         private AndGate PCloadAnd;
+        
         private Wire JMP0;
         private Wire JMP7;
+
         //JGT
         private NotGate JGTzeroNot;
         private NotGate JGTnegNot;
+
         private AndGate AndJGT;
+
         //JGE
         private NotGate NotJGE;
+
         private OrGate OrJGE;
+
         //JNE
         private NotGate NotJNE;
+
         //JLE
         private OrGate OrJLE;
 
@@ -137,7 +143,7 @@ namespace Machine
 
             //5. connect control to register D (very simple)
             DloadAnd = new AndGate();
-            
+
             DloadAnd.ConnectInput1(Instruction[Type]);
             DloadAnd.ConnectInput2(Instruction[D2]);
             m_rD.Load.ConnectInput(DloadAnd.Output);
@@ -149,10 +155,11 @@ namespace Machine
             AwriteNot.ConnectInput(Instruction[Type]);
             AwriteOr.ConnectInput1(AwriteNot.Output);
             AwriteOr.ConnectInput2(Instruction[D1]);
+            m_rA.Load.ConnectInput(AwriteOr.Output);
 
             //7. connect control to MemoryWrite
             MwriteAnd = new AndGate();
-            
+
             MwriteAnd.ConnectInput1(Instruction[Type]);
             MwriteAnd.ConnectInput2(Instruction[D3]);
             MemoryWrite.ConnectInput(MwriteAnd.Output);
@@ -173,36 +180,36 @@ namespace Machine
 
             //9. connect jump mux (this is the most complicated part)
             m_gJumpMux = new BitwiseMultiwayMux(1, 3);
-            
+
             m_gJumpMux.Inputs[0][0].ConnectInput(JMP0);
-            
+
             JGTzeroNot.ConnectInput(m_gALU.Zero);
             JGTnegNot.ConnectInput(m_gALU.Negative);
             AndJGT.ConnectInput1(JGTzeroNot.Output);
             AndJGT.ConnectInput2(JGTnegNot.Output);
             m_gJumpMux.Inputs[1][0].ConnectInput(AndJGT.Output);
-            
+
             m_gJumpMux.Inputs[2][0].ConnectInput(m_gALU.Zero);
-            
+
             NotJGE.ConnectInput(m_gALU.Negative);
             OrJGE.ConnectInput1(m_gALU.Zero);
             OrJGE.ConnectInput2(NotJGE.Output);
             m_gJumpMux.Inputs[3][0].ConnectInput(OrJGE.Output);
-            
+
             m_gJumpMux.Inputs[4][0].ConnectInput(m_gALU.Negative);
-            
+
             NotJNE.ConnectInput(m_gALU.Zero);
             m_gJumpMux.Inputs[5][0].ConnectInput(NotJNE.Output);
-            
+
             OrJLE.ConnectInput1(m_gALU.Zero);
             OrJLE.ConnectInput2(m_gALU.Negative);
             m_gJumpMux.Inputs[6][0].ConnectInput(OrJLE.Output);
-            
+
             m_gJumpMux.Inputs[7][0].ConnectInput(JMP7);
-            
+
             //10. connect PC load control
             PCloadAnd = new AndGate();
-            
+
             PCloadAnd.ConnectInput1(Instruction[Type]);
             PCloadAnd.ConnectInput2(m_gJumpMux.Output[0]);
             m_rPC.ConnectLoad(PCloadAnd.Output);
