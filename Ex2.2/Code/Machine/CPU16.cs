@@ -99,35 +99,23 @@ namespace Machine
         private AndGate MwriteAnd;
         private OrGate AwriteOr;
         private NotGate AwriteNot;
-
-        private WireSet JMP0;
-
-        private WireSet JMP7;
-
+        private AndGate PCloadAnd;
+        private Wire JMP0;
+        private Wire JMP7;
         //JGT
         private NotGate JGTzeroNot;
         private NotGate JGTnegNot;
-
         private AndGate AndJGT;
-
         //JGE
         private NotGate NotJGE;
-
         private OrGate OrJGE;
-
         //JNE
         private NotGate NotJNE;
-
         //JLE
         private OrGate OrJLE;
 
         private void ConnectControls()
         {
-            DloadAnd = new AndGate();
-            MwriteAnd = new AndGate();
-            AwriteOr = new OrGate();
-            AwriteNot = new NotGate();
-
             //1. connect control of mux 1 (selects entrance to register A)
 
             m_gAMux.ConnectControl(Instruction[Type]);
@@ -140,28 +128,38 @@ namespace Machine
 
             //4. connect ALU control bits
 
+            m_gALU.ZeroX.ConnectInput(Instruction[C1]);
+            m_gALU.NotX.ConnectInput(Instruction[C2]);
+            m_gALU.ZeroY.ConnectInput(Instruction[C3]);
+            m_gALU.NotY.ConnectInput(Instruction[C4]);
+            m_gALU.F.ConnectInput(Instruction[C5]);
+            m_gALU.NotOutput.ConnectInput(Instruction[C6]);
 
             //5. connect control to register D (very simple)
-
+            DloadAnd = new AndGate();
+            
             DloadAnd.ConnectInput1(Instruction[Type]);
             DloadAnd.ConnectInput2(Instruction[D2]);
             m_rD.Load.ConnectInput(DloadAnd.Output);
 
             //6. connect control to register A (a bit more complicated)
+            AwriteOr = new OrGate();
+            AwriteNot = new NotGate();
 
             AwriteNot.ConnectInput(Instruction[Type]);
             AwriteOr.ConnectInput1(AwriteNot.Output);
             AwriteOr.ConnectInput2(Instruction[D1]);
 
             //7. connect control to MemoryWrite
+            MwriteAnd = new AndGate();
 
             MwriteAnd.ConnectInput1(Instruction[Type]);
             MwriteAnd.ConnectInput2(Instruction[D3]);
             MemoryWrite.ConnectInput(MwriteAnd.Output);
 
             //8. create inputs for jump mux
-            JMP0 = new WireSet(1);
-            JMP7 = new WireSet(1);
+            JMP0 = new Wire();
+            JMP7 = new Wire();
             JGTzeroNot = new NotGate();
             JGTnegNot = new NotGate();
             AndJGT = new AndGate();
@@ -170,14 +168,44 @@ namespace Machine
             NotJNE = new NotGate();
             OrJLE = new OrGate();
 
-            JMP0.SetValue(0);
-            JMP7.SetValue(1);
+            JMP0.Value = 0;
+            JMP7.Value = 1;
 
             //9. connect jump mux (this is the most complicated part)
             m_gJumpMux = new BitwiseMultiwayMux(1, 3);
-            m_gJumpMux.ConnectInput(0, JMP0);
-
+            
+            m_gJumpMux.Inputs[0][0].ConnectInput(JMP0);
+            
+            JGTzeroNot.ConnectInput(m_gALU.Zero);
+            JGTnegNot.ConnectInput(m_gALU.Negative);
+            AndJGT.ConnectInput1(JGTzeroNot.Output);
+            AndJGT.ConnectInput2(JGTnegNot.Output);
+            m_gJumpMux.Inputs[1][0].ConnectInput(AndJGT.Output);
+            
+            m_gJumpMux.Inputs[2][0].ConnectInput(m_gALU.Zero);
+            
+            NotJGE.ConnectInput(m_gALU.Negative);
+            OrJGE.ConnectInput1(m_gALU.Zero);
+            OrJGE.ConnectInput2(NotJGE.Output);
+            m_gJumpMux.Inputs[3][0].ConnectInput(OrJGE.Output);
+            
+            m_gJumpMux.Inputs[4][0].ConnectInput(m_gALU.Negative);
+            
+            NotJNE.ConnectInput(m_gALU.Zero);
+            m_gJumpMux.Inputs[5][0].ConnectInput(NotJNE.Output);
+            
+            OrJLE.ConnectInput1(m_gALU.Zero);
+            OrJLE.ConnectInput2(m_gALU.Negative);
+            m_gJumpMux.Inputs[6][0].ConnectInput(OrJLE.Output);
+            
+            m_gJumpMux.Inputs[7][0].ConnectInput(JMP7);
+            
             //10. connect PC load control
+            PCloadAnd = new AndGate();
+            
+            PCloadAnd.ConnectInput1(Instruction[Type]);
+            PCloadAnd.ConnectInput2(m_gJumpMux.Output[0]);
+            m_rPC.ConnectLoad(PCloadAnd.Output);
         }
 
         public override string ToString()
