@@ -14,11 +14,11 @@ namespace Machine
         static void Main(string[] args)
         {
             Machine16 machine = new Machine16(false, true);
-            machine.Code.LoadFromFile(@"D:\BGU-PC\MMM\MMM\Ex2.2\Assemblyexamples\TestJumping.hack");
+            machine.Code.LoadFromFile(@"D:\BGU-PC\MMM\MMM\Ex2.2\Assemblyexamples\ScreenExample.hack");
             machine.Data[0] = 0;
             DateTime dtStart = DateTime.Now;
             machine.Reset();
-            for (int i = 0; i < 50; i++)
+            for (int i = 0; i < 500; i++)
             {
                 machine.CPU.PrintState();
                 Console.WriteLine();
