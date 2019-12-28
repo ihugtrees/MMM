@@ -18,6 +18,8 @@ namespace Assembler
 
         //more data structures here (symbol map, ...)
 
+        private Dictionary<string, int> symbolMap;
+
         public Assembler()
         {
             InitCommandDictionaries();
@@ -109,18 +111,55 @@ namespace Assembler
         //second pass - record all symbols - labels and variables
         private void CreateSymbolTable(List<string> lLines)
         {
+            symbolMap = new Dictionary<string, int>();
+            initSymbolMap();
             string sLine = "";
+            int emptyLines = 0;
             for (int i = 0; i < lLines.Count; i++)
             {
                 sLine = lLines[i];
+                string irrelevantLine = CleanWhiteSpacesAndComments(lLines[i]);
+                if (irrelevantLine == "")
+                {
+                    emptyLines++;
+                    continue;
+                }
+
                 if (IsLabelLine(sLine))
                 {
                     //record label in symbol table
                     //do not add the label line to the result
+                    char c = sLine[1];
+                    if (!((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')))
+                        throw new FormatException("Label can't start with number");
+                    string label = sLine.Substring(1, sLine.Length - 2);
+                    if (symbolMap.ContainsKey(label))
+                    {
+                        if (symbolMap[label] == -1)
+                        {
+                            symbolMap[label] = i - emptyLines;
+                            emptyLines++;
+                        }
+                        else
+                            throw new FormatException("Label with same name already exists");
+                    }
+                    else
+                    {
+                        symbolMap.Add(label, i - emptyLines);
+                        emptyLines++;
+                    }
                 }
                 else if (IsACommand(sLine))
                 {
                     //may contain a variable - if so, record it to the symbol table (if it doesn't exist there yet...)
+                    char c = sLine[1];
+                    if (!((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')))
+                        continue;
+
+                    if (!symbolMap.ContainsKey(sLine.Substring(1)))
+                    {
+                        symbolMap.Add(sLine.Substring(1), -1);
+                    }
                 }
                 else if (IsCCommand(sLine))
                 {
@@ -128,6 +167,29 @@ namespace Assembler
                 }
                 else
                     throw new FormatException("Cannot parse line " + i + ": " + lLines[i]);
+            }
+
+            finalSymbolMap();
+        }
+
+        private void initSymbolMap()
+        {
+            for (int i = 0; i < 16; i++)
+                symbolMap.Add("R" + i, i);
+            symbolMap.Add("SCREEN", 16384);
+            symbolMap.Add("KBD", 24576);
+        }
+
+        private void finalSymbolMap()
+        {
+            int newValue = 16;
+            foreach (KeyValuePair<string, int> pair in symbolMap)
+            {
+                if (pair.Value == -1)
+                {
+                    symbolMap[pair.Key] = newValue;
+                    newValue++;
+                }
             }
         }
 
@@ -142,9 +204,16 @@ namespace Assembler
                 if (IsACommand(sLine))
                 {
                     //translate an A command into a sequence of bits
-                    string snumber = sLine.Substring(1);
-                    int number = Int32.Parse(snumber);
-                    lAfterPass.Add(ToBinary(number));
+                    string labelOrInt = sLine.Substring(1);
+                    int number = -1;
+                    if (Int32.TryParse(labelOrInt, out number))
+                    {
+                        lAfterPass.Add(ToBinary(number));
+                    }
+                    else
+                    {
+                        lAfterPass.Add(ToBinary(symbolMap[labelOrInt]));
+                    }
                 }
                 else if (IsCCommand(sLine))
                 {
@@ -153,7 +222,7 @@ namespace Assembler
                     //translate an C command into a sequence of bits
                     //take a look at the dictionaries m_dControl, m_dJmp, and where they are initialized (InitCommandDictionaries), to understand how to you them here
                     int[] arrBinJmp, arrBinControl, arrBinDest;
-                    string strBinJmp, strBinControl, strBinDest;
+                    string strBinJmp, strBinControl, strBinDest, firstBits;
 
                     m_dJmp.TryGetValue(sJmp, out arrBinJmp);
                     strBinJmp = ToString(arrBinJmp);
@@ -164,10 +233,14 @@ namespace Assembler
                     m_dDest.TryGetValue(sDest, out arrBinDest);
                     strBinDest = ToString(arrBinDest);
 
-                    string final = strBinControl + strBinDest + strBinJmp;
+                    firstBits = ToString(new[] {1, 1, 1});
+
+                    string final = firstBits + strBinControl + strBinDest + strBinJmp;
                     lAfterPass.Add(final);
-                }
-                else
+                }else if (IsLabelLine(sLine))
+                {
+                    //Do Nothing
+                }else
                     throw new FormatException("Cannot parse line " + i + ": " + lLines[i]);
             }
 
