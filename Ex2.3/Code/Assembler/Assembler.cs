@@ -57,6 +57,10 @@ namespace Assembler
 
             //expand the macros
             List<string> lAfterMacroExpansion = ExpendMacros(lLines);
+            // foreach (var line in lAfterMacroExpansion)
+            // {
+            //     Console.WriteLine(line);
+            // }
 
             //first pass - create symbol table and remove lable lines
             CreateSymbolTable(lAfterMacroExpansion);
@@ -101,6 +105,97 @@ namespace Assembler
                 GetCommandParts(sLine, out sDest, out sCompute, out sJmp);
                 //your code here - check for indirect addessing and for jmp shortcuts
                 //read the word file to see all the macros you need to support
+                if (sDest.Equals("") && sJmp.Equals("")) // incr/decr
+                {
+                    int plusIndx = sCompute.IndexOf('+');
+                    if (plusIndx > -1)
+                    {
+                        string label = sCompute.Substring(0, plusIndx);
+                        if (label.Equals("A") || label.Equals("D"))
+                        {
+                            lExpanded.Add(label + "=" + label + "+1");
+                        }
+                        else
+                        {
+                            lExpanded.Add("@" + label);
+                            lExpanded.Add("M=M+1");
+                        }
+                    }
+                    else
+                    {
+                        plusIndx = sCompute.IndexOf('-');
+                        string label = sCompute.Substring(0, plusIndx);
+                        if (label.Equals("A") || label.Equals("D"))
+                        {
+                            lExpanded.Add(label + "=" + label + "-1");
+                        }
+                        else
+                        {
+                            lExpanded.Add("@" + label);
+                            lExpanded.Add("M=M-1");
+                        }
+                    }
+                }
+                else if (sJmp.Equals("")) // direct/immediate addresing
+                {
+                    char comp = sCompute[0];
+
+                    if (comp >= '0' && comp <= '9') // immediate
+                    {
+                        if (sDest.Equals("D"))
+                        {
+                            lExpanded.Add("@" + sCompute);
+                            lExpanded.Add("D=A");
+                        }
+                        else if (sDest.Equals("A"))
+                        {
+                            lExpanded.Add("@" + sCompute);
+                        }
+                        else if (sDest.Equals("M"))
+                        {
+                        }
+                        else
+                        {
+                            lExpanded.Add("@" + sCompute);
+                            lExpanded.Add("D=A");
+                            lExpanded.Add("@" + sDest);
+                            lExpanded.Add("M=D");
+                        }
+                    }
+                    else // direct
+                    {
+                        if (!m_dDest.ContainsKey(sDest) && !m_dControl.ContainsKey(sCompute))
+                        {
+                            lExpanded.Add("@" + sCompute);
+                            lExpanded.Add("D=M");
+                            lExpanded.Add("@" + sDest);
+                            lExpanded.Add("M=D");
+                        }
+                        else if (m_dDest.ContainsKey(sDest) && !m_dControl.ContainsKey(sCompute))
+                        {
+                            lExpanded.Add("@" + sCompute);
+                            lExpanded.Add(sDest + "=M");
+                        }
+                        else if (!m_dDest.ContainsKey(sDest) && m_dControl.ContainsKey(sCompute))
+                        {
+                            lExpanded.Add("@" + sDest);
+                            lExpanded.Add("M=" + sCompute);
+                        }
+                    }
+                }
+                else // jump macro
+                {
+                    int labelIndx = sJmp.IndexOf(':');
+                    if (labelIndx > 0)
+                    {
+                        string label = sJmp.Substring(labelIndx + 1), jmp = sJmp.Substring(0, 3);
+                        lExpanded.Add("@" + label);
+                        if (sDest.Equals(""))
+                            lExpanded.Add(sCompute + ";" + jmp);
+                        else
+                            lExpanded.Add(sDest + "=" + sCompute + ";" + jmp);
+                    }
+                }
             }
 
             if (lExpanded.Count == 0)
@@ -119,7 +214,7 @@ namespace Assembler
             {
                 sLine = lLines[i];
                 string irrelevantLine = CleanWhiteSpacesAndComments(lLines[i]);
-                if (irrelevantLine == "")
+                if (irrelevantLine.Equals(""))
                 {
                     emptyLines++;
                     continue;
@@ -183,8 +278,9 @@ namespace Assembler
         private void finalSymbolMap()
         {
             int newValue = 16;
-            foreach (KeyValuePair<string, int> pair in symbolMap)
+            for (int i = 0; i < symbolMap.Count; i++)
             {
+                var pair = symbolMap.ElementAt(i);
                 if (pair.Value == -1)
                 {
                     symbolMap[pair.Key] = newValue;
@@ -222,7 +318,7 @@ namespace Assembler
                     //translate an C command into a sequence of bits
                     //take a look at the dictionaries m_dControl, m_dJmp, and where they are initialized (InitCommandDictionaries), to understand how to you them here
                     int[] arrBinJmp, arrBinControl, arrBinDest;
-                    string strBinJmp, strBinControl, strBinDest, firstBits;
+                    string strBinJmp, strBinControl, strBinDest;
 
                     m_dJmp.TryGetValue(sJmp, out arrBinJmp);
                     strBinJmp = ToString(arrBinJmp);
@@ -233,14 +329,14 @@ namespace Assembler
                     m_dDest.TryGetValue(sDest, out arrBinDest);
                     strBinDest = ToString(arrBinDest);
 
-                    firstBits = ToString(new[] {1, 1, 1});
-
-                    string final = firstBits + strBinControl + strBinDest + strBinJmp;
+                    string final = "111" + strBinControl + strBinDest + strBinJmp;
                     lAfterPass.Add(final);
-                }else if (IsLabelLine(sLine))
+                }
+                else if (IsLabelLine(sLine))
                 {
                     //Do Nothing
-                }else
+                }
+                else
                     throw new FormatException("Cannot parse line " + i + ": " + lLines[i]);
             }
 
@@ -341,24 +437,31 @@ namespace Assembler
             m_dControl["-D"] = new int[] {0, 0, 0, 1, 1, 1, 1};
             m_dControl["-A"] = new int[] {0, 1, 1, 0, 0, 1, 1};
             m_dControl["D+1"] = new int[] {0, 0, 1, 1, 1, 1, 1};
+            m_dControl["1+D"] = new int[] {0, 0, 1, 1, 1, 1, 1};
             m_dControl["A+1"] = new int[] {0, 1, 1, 0, 1, 1, 1};
+            m_dControl["1+A"] = new int[] {0, 1, 1, 0, 1, 1, 1};
             m_dControl["D-1"] = new int[] {0, 0, 0, 1, 1, 1, 0};
             m_dControl["A-1"] = new int[] {0, 1, 1, 0, 0, 1, 0};
             m_dControl["D+A"] = new int[] {0, 0, 0, 0, 0, 1, 0};
+            m_dControl["A+D"] = new int[] {0, 0, 0, 0, 0, 1, 0};
             m_dControl["D-A"] = new int[] {0, 0, 1, 0, 0, 1, 1};
             m_dControl["A-D"] = new int[] {0, 0, 0, 0, 1, 1, 1};
             m_dControl["D&A"] = new int[] {0, 0, 0, 0, 0, 0, 0};
+            m_dControl["A&D"] = new int[] {0, 0, 0, 0, 0, 0, 0};
             m_dControl["D|A"] = new int[] {0, 0, 1, 0, 1, 0, 1};
 
             m_dControl["M"] = new int[] {1, 1, 1, 0, 0, 0, 0};
             m_dControl["!M"] = new int[] {1, 1, 1, 0, 0, 0, 1};
             m_dControl["-M"] = new int[] {1, 1, 1, 0, 0, 1, 1};
             m_dControl["M+1"] = new int[] {1, 1, 1, 0, 1, 1, 1};
+            m_dControl["1+M"] = new int[] {1, 1, 1, 0, 1, 1, 1};
             m_dControl["M-1"] = new int[] {1, 1, 1, 0, 0, 1, 0};
             m_dControl["D+M"] = new int[] {1, 0, 0, 0, 0, 1, 0};
+            m_dControl["M+D"] = new int[] {1, 0, 0, 0, 0, 1, 0};
             m_dControl["D-M"] = new int[] {1, 0, 1, 0, 0, 1, 1};
             m_dControl["M-D"] = new int[] {1, 0, 0, 0, 1, 1, 1};
             m_dControl["D&M"] = new int[] {1, 0, 0, 0, 0, 0, 0};
+            m_dControl["M&D"] = new int[] {1, 0, 0, 0, 0, 0, 0};
             m_dControl["D|M"] = new int[] {1, 0, 1, 0, 1, 0, 1};
 
 
