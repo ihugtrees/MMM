@@ -107,13 +107,12 @@ namespace Assembler
                 //read the word file to see all the macros you need to support
 
                 string dest = String.Concat(sDest.OrderBy(c => c)); // orignial sorted AMD
-
                 char comp = sCompute[0];
                 int lbl = sJmp.IndexOf(':');
                 bool incr = sCompute.Contains("++");
                 bool dec = sCompute.Contains("--");
 
-                if (lbl > 0 || incr || dec || comp >= 0 && comp <= 9
+                if (lbl > 0 || incr || dec || comp >= 0 && comp <= 9 // checks if has macro if not do nothing
                     || !m_dDest.ContainsKey(dest) || !m_dControl.ContainsKey(sCompute))
                 {
                     if (sDest.Equals("") && sJmp.Equals("")) // incr/decr
