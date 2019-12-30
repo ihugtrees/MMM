@@ -105,6 +105,7 @@ namespace Assembler
                 GetCommandParts(sLine, out sDest, out sCompute, out sJmp);
                 //your code here - check for indirect addessing and for jmp shortcuts
                 //read the word file to see all the macros you need to support
+                
                 if (sDest.Equals("") && sJmp.Equals("")) // incr/decr
                 {
                     int plusIndx = sCompute.IndexOf('+');
@@ -372,6 +373,7 @@ namespace Assembler
             {
                 int idx = sLine.IndexOf('=');
                 sDest = sLine.Substring(0, idx);
+                sDest = String.Concat(sDest.OrderBy(c => c));
                 sLine = sLine.Substring(idx + 1);
             }
             else
@@ -481,11 +483,11 @@ namespace Assembler
             m_dDest[""] = new int[] {0, 0, 0};
             m_dDest["M"] = new int[] {0, 0, 1};
             m_dDest["D"] = new int[] {0, 1, 0};
-            m_dDest["MD"] = new int[] {0, 1, 1};
+            m_dDest["DM"] = new int[] {0, 1, 1};
             m_dDest["A"] = new int[] {1, 0, 0};
             m_dDest["AM"] = new int[] {1, 0, 1};
             m_dDest["AD"] = new int[] {1, 1, 0};
-            m_dDest["AMD"] = new int[] {1, 1, 1};
+            m_dDest["ADM"] = new int[] {1, 1, 1};
         }
     }
 }

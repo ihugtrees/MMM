@@ -15,8 +15,8 @@ namespace Assembler
             //string sourceFileLocation = the path to your source file
             //string destFileLocation = the path to your dest file
             //a.TranslateAssemblyFile(sourceFileLocation, destFileLocation);
-            a.TranslateAssemblyFile(@"D:\BGU-PC\MMM\MMM\Ex2.3\Code\AssemblyExamples\Fibonacci.asm"
-                ,@"D:\BGU-PC\MMM\MMM\Ex2.3\Code\AssemblyExamples\AsmOutput\Fibonacci.mc");
+            a.TranslateAssemblyFile(@"D:\BGU-PC\MMM\MMM\Ex2.3\Code\AssemblyExamples\test.asm"
+                ,@"D:\BGU-PC\MMM\MMM\Ex2.3\Code\AssemblyExamples\AsmOutput\test.mc");
         }
     }
 }

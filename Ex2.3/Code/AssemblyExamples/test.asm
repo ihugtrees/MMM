@@ -1,7 +1,1 @@
-
-
-(START)
-
-
-@START
-0;JMP
+MDA=D
