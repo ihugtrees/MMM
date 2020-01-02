@@ -89,7 +89,29 @@ namespace SimpleCompiler
         {
             List<Token> lTokens = new List<Token>();
             //your code here
+            var myList = new List<char>();
+            myList.AddRange(Token.Parentheses);
+            myList.AddRange(Token.Separators);
+            myList.AddRange(Token.Operators);
+            char[] delimiters = myList.ToArray();
+            string token;
+            int index;
+            List<string> tokens = new List<string>();
+            foreach (var line in lCodeLines)
+            {
+                tokens = Split(line, delimiters);
+                for (int i = 0; i < tokens.Count; i++)
+                {
+                    var splitTokens = tokens[i].Split();
+                }
+                // string choppedLine = line;
+                // while (choppedLine.Length > 0)
+                // {
+                //     choppedLine = Next(choppedLine, delimiters, out token, out index);
+                // }
+            }
             
+
             return lTokens;
         }
 

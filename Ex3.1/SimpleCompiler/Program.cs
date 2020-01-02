@@ -12,7 +12,7 @@ namespace SimpleCompiler
         static bool Test1()
         {
             Compiler c = new Compiler();
-            List<string> lCodeLines = c.ReadFile(@"GCD.Jack");
+            List<string> lCodeLines = c.ReadFile(@"D:\BGU-PC\MMM\MMM\Ex3.1\CodeFiles\GCD.Jack");
             List<Token> lTokens = c.Tokenize(lCodeLines);
             Token t = lTokens[0];
             if (t.ToString() != "function" || !(t is Statement))
