@@ -8,8 +8,6 @@ namespace SimpleCompiler
 {
     class Compiler
     {
-
-
         public Compiler()
         {
         }
@@ -23,10 +21,10 @@ namespace SimpleCompiler
             {
                 lCodeLines.Add(sr.ReadLine());
             }
+
             sr.Close();
             return lCodeLines;
         }
-
 
 
         //Computes the next token in the string s, from the begining of s until a delimiter has been reached. 
@@ -46,6 +44,7 @@ namespace SimpleCompiler
                     sToken += s[i];
                 cChars++;
             }
+
             return null;
         }
 
@@ -69,6 +68,7 @@ namespace SimpleCompiler
                     else
                         sToken += s[i];
                 }
+
                 if (i == s.Length)
                 {
                     lTokens.Add(sToken);
@@ -77,6 +77,7 @@ namespace SimpleCompiler
                 else
                     s = s.Substring(i + 1);
             }
+
             return lTokens;
         }
 
@@ -93,28 +94,86 @@ namespace SimpleCompiler
             myList.AddRange(Token.Parentheses);
             myList.AddRange(Token.Separators);
             myList.AddRange(Token.Operators);
+            myList.Add(' ');
+            myList.Add('\t');
+
             char[] delimiters = myList.ToArray();
-            string token;
-            int index;
             List<string> tokens = new List<string>();
-            foreach (var line in lCodeLines)
+            int lineIndex = 0;
+            for (var i = 0; i < lCodeLines.Count; i++)
             {
-                tokens = Split(line, delimiters);
-                for (int i = 0; i < tokens.Count; i++)
+                int posIndex = 0;
+                var line = lCodeLines[i];
+                if (line.Contains("//")) // handle comments and empty lines
                 {
-                    var splitTokens = tokens[i].Split();
+                    int indexOfComment = line.IndexOf("//");
+                    if (indexOfComment == 0)
+                    {
+                        lineIndex++;
+                        continue;
+                    }
+
+                    line = line.Substring(0, indexOfComment);
                 }
-                // string choppedLine = line;
-                // while (choppedLine.Length > 0)
-                // {
-                //     choppedLine = Next(choppedLine, delimiters, out token, out index);
-                // }
+
+                tokens = Split(line, delimiters);
+                for (var j = 0; j < tokens.Count; j++)
+                {
+                    int number;
+                    var token = tokens[j];
+
+                    if (token.Equals("\t") || token.Equals(" "))
+                    {
+                        posIndex += 1;
+                        continue;
+                    }
+
+                    if (Token.Statements.Contains(token))
+                    {
+                        lTokens.Add(new Statement(token, lineIndex, posIndex));
+                    }
+                    else if (Token.Constants.Contains(token))
+                    {
+                        lTokens.Add(new Constant(token, lineIndex, posIndex));
+                    }
+                    else if (Token.VarTypes.Contains(token))
+                    {
+                        lTokens.Add(new VarType(token, lineIndex, posIndex));
+                    }
+                    else if (Token.Operators.Contains(token.First()))
+                    {
+                        lTokens.Add(new Operator(token[0], lineIndex, posIndex));
+                    }
+                    else if (Token.Parentheses.Contains(token.First()))
+                    {
+                        lTokens.Add(new Parentheses(token[0], lineIndex, posIndex));
+                    }
+                    else if (Token.Separators.Contains(token.First()))
+                    {
+                        lTokens.Add(new Separator(token[0], lineIndex, posIndex));
+                    }
+                    else if (Int32.TryParse(token, out number))
+                    {
+                        lTokens.Add(new Number(token, lineIndex, posIndex));
+                    }
+                    else
+                    {
+                        char first = token[0];
+                        if (!(Char.IsLetter(first)))
+                        {
+                            Token problematic = new Identifier(token, lineIndex, posIndex);
+                            throw new SyntaxErrorException("identifier can't start with number", problematic);
+                        }
+                        lTokens.Add(new Identifier(token, lineIndex, posIndex));
+                    }
+
+                    posIndex += token.Length;
+                }
+
+                lineIndex++;
             }
-            
 
             return lTokens;
         }
-
     }
 }
-
