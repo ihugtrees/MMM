@@ -19,8 +19,13 @@ namespace SimpleCompiler
 
         public override void Parse(TokensStack sTokens)
         {
-            throw new NotImplementedException();
-
+            sTokens.Pop(); // (
+            Operand1 = Create(sTokens);
+            Operand1.Parse(sTokens);
+            Operator = sTokens.Pop().ToString();
+            Operand2 = Create(sTokens);
+            Operand2.Parse(sTokens);
+            sTokens.Pop(); // )
         }
     }
 }

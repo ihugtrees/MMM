@@ -9,38 +9,36 @@ namespace SimpleCompiler
 {
     class Program
     {
-
-
-
-
         static void Main(string[] args)
         {
             TestParse();
         }
 
 
-
         public static string GetName(Token t)
         {
             if (t is Identifier)
             {
-                return ((Identifier)t).Name;
+                return ((Identifier) t).Name;
             }
+
             if (t is Keyword)
             {
-                return ((Keyword)t).Name;
+                return ((Keyword) t).Name;
             }
+
             if (t is Symbol)
             {
-                return ((Symbol)t).Name + "";
+                return ((Symbol) t).Name + "";
             }
+
             if (t is Number)
             {
-                return ((Number)t).Value +"";
+                return ((Number) t).Value + "";
             }
+
             return "";
         }
-
 
 
         private static bool TestParse()
@@ -48,7 +46,7 @@ namespace SimpleCompiler
             try
             {
                 Compiler sc = new Compiler();
-                List<string> lLines = sc.ReadFile(@"Program.Jack");
+                List<string> lLines = sc.ReadFile(@"D:\BGU-PC\MMM\MMM\Ex3.2\CodeFiles\Program.Jack");
                 List<Token> lTokens = sc.Tokenize(lLines);
                 TokensStack sTokens = new TokensStack();
                 for (int i = lTokens.Count - 1; i >= 0; i--)
@@ -67,14 +65,15 @@ namespace SimpleCompiler
 
 
                 for (int i = 0; i < sAllTokens.Length; i++)
-                    if(sAllTokens[i] != sAfterParsing[i])
+                    if (sAllTokens[i] != sAfterParsing[i])
                         return false;
                 return true;
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Console.WriteLine(e);
             }
+
             return false;
         }
     }
