@@ -3,7 +3,35 @@ var int y;
 var char z;
 var array w;
 
+function int main(array argv, int argc){
+	var int x;
+	var int y;
+	var int z;
+	let x = f1(10);
+	let y = f2(10, f3(8));
+	return (x + y );
+}
 
+function int f3(int x, int y){
+	var char c1;
+	var char c2;
+	if(flag){
+		let x = (x +1);
+	}
+	else{
+		let x = (x- 1);
+	}
+	while((x> 0)){
+		while((y< 3)){
+			while((c1= 32)){
+				let x = (x +(x- y));
+				let y = ((-y +(x/ 2))* ((z+ 1) * f((-c1 - (c2+ 1)))));
+
+			}
+		}
+	}
+	return z;
+}
 
 //Comment1
 function int f1( int a, int b){
@@ -31,34 +59,4 @@ function int f2(int n){
 	let n2 = f2(( n -(2+n1)));
 	//Solution construction
 	return (n1 *n2);
-}
-
-function int f3(int x, int y){
-	var char c1;
-	var char c2;
-	if(flag){
-		let x = (x +1);
-	}
-	else{
-		let x = (x- 1);
-	}
-	while((x> 0)){
-		while((y< 3)){
-			while((c1= 32)){
-				let x = (x +(x- y));
-				let y = ((-y +(x/ 2))* ((z+ 1) * f((-c1 - (c2+ 1)))));
-
-			}
-		}
-	}
-	return z;
-}
-
-function int main(array argv, int argc){
-	var int x;
-	var int y;
-	var int z;
-	let x = f1(10);
-	let y = f2(10, f3(8));
-	return (x + y );
 }

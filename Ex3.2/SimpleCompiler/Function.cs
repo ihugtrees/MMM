@@ -28,23 +28,23 @@ namespace SimpleCompiler
         {
             //We check that the first token is "function"
             Token tFunc = sTokens.Pop();
-            if (!(tFunc is Statement) || ((Statement)tFunc).Name != "function")
+            if (!(tFunc is Statement) || ((Statement) tFunc).Name != "function")
                 throw new SyntaxErrorException("Expected function received: " + tFunc, tFunc);
             //Now there should be the return type. We pop it from the stack, check for errors, and then set the field
             Token tType = sTokens.Pop();
-            if(!(tType is VarType))
-                 throw new SyntaxErrorException("Expected var type, received " + tType, tType);
+            if (!(tType is VarType))
+                throw new SyntaxErrorException("Expected var type, received " + tType, tType);
             ReturnType = VarDeclaration.GetVarType(tType);
             //Next is the function name
             Token tName = sTokens.Pop();
-            if(!(tName is Identifier))
+            if (!(tName is Identifier))
                 throw new SyntaxErrorException("Expected function name, received " + tType, tType);
-            Name = ((Identifier)tName).Name;
+            Name = ((Identifier) tName).Name;
 
             //After the name there should be opening paranthesis for the arguments
             Token t = sTokens.Pop(); //(
             //Now we extract the arguments from the stack until we see a closing parathesis
-            while(sTokens.Count > 0 && !(sTokens.Peek() is Parentheses))//)
+            while (sTokens.Count > 0 && !(sTokens.Peek() is Parentheses)) //)
             {
                 //For each argument there should be a type, and a name
                 if (sTokens.Count < 3)
@@ -54,15 +54,20 @@ namespace SimpleCompiler
                 VarDeclaration vc = new VarDeclaration(tArgType, tArgName);
                 Args.Add(vc);
                 //If there is a comma, then there is another argument
-                if (sTokens.Count > 0 && sTokens.Peek() is Separator)//,
-                    sTokens.Pop(); 
+                if (sTokens.Count > 0 && sTokens.Peek() is Separator) //,
+                    sTokens.Pop();
             }
+
             //Now we pop out the ) and the {. Note that you need to check that the stack contains the correct symbols here.
-            t = sTokens.Pop();//)
-            t = sTokens.Pop();//{
+            t = sTokens.Pop(); //)
+            if (!(t is Parentheses) || ((Parentheses) t).Name != ')')
+                throw new SyntaxErrorException("Expected ) received: " + t, t);
+            t = sTokens.Pop(); //{
+            if (!(t is Parentheses) || ((Parentheses) t).Name != '{')
+                throw new SyntaxErrorException("Expected { received: " + t, t);
 
             //Now we parse the list of local variable declarations
-            while (sTokens.Count > 0 && (sTokens.Peek() is Statement) && (((Statement)sTokens.Peek()).Name == "var"))
+            while (sTokens.Count > 0 && (sTokens.Peek() is Statement) && (((Statement) sTokens.Peek()).Name == "var"))
             {
                 VarDeclaration local = new VarDeclaration();
                 //We call the Parse method of the VarDeclaration, which is responsible to parsing the elements of the variable declaration
@@ -79,9 +84,12 @@ namespace SimpleCompiler
                 s.Parse(sTokens);
                 Body.Add(s);
             }
+
             //Need to check here that the last statement is a return statement
             //Finally, the function should end with }
-            Token tEnd = sTokens.Pop();//}
+            t = sTokens.Pop(); //}
+            if (!(t is Parentheses) || ((Parentheses) t).Name != '}')
+                throw new SyntaxErrorException("Expected } received: " + t, t);
         }
 
         public override string ToString()
@@ -89,7 +97,7 @@ namespace SimpleCompiler
             string sFunction = "function " + ReturnType + " " + Name + "(";
             for (int i = 0; i < Args.Count - 1; i++)
                 sFunction += Args[i].Type + " " + Args[i].Name + ",";
-            if(Args.Count > 0)
+            if (Args.Count > 0)
                 sFunction += Args[Args.Count - 1].Type + " " + Args[Args.Count - 1].Name;
             sFunction += "){\n";
             foreach (VarDeclaration v in Locals)

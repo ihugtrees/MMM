@@ -11,7 +11,7 @@ namespace SimpleCompiler
     {
         static void Main(string[] args)
         {
-            TestParse();
+            Console.WriteLine(TestParse());
         }
 
 
@@ -64,6 +64,8 @@ namespace SimpleCompiler
                     sAllTokens += GetName(t).ToLower();
 
 
+                //Console.WriteLine(sAllTokens);
+                //Console.WriteLine(sAfterParsing);
                 for (int i = 0; i < sAllTokens.Length; i++)
                     if (sAllTokens[i] != sAfterParsing[i])
                         return false;

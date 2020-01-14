@@ -8,9 +8,9 @@ namespace SimpleCompiler
 {
     public class BinaryOperationExpression : Expression
     {
-        public string Operator { get;  set; }
-        public Expression Operand1 { get;  set; }
-        public Expression Operand2 { get;  set; }
+        public string Operator { get; set; }
+        public Expression Operand1 { get; set; }
+        public Expression Operand2 { get; set; }
 
         public override string ToString()
         {
@@ -19,13 +19,24 @@ namespace SimpleCompiler
 
         public override void Parse(TokensStack sTokens)
         {
-            sTokens.Pop(); // (
+            Token t = sTokens.Pop(); // (
+            if (!(t is Parentheses) || ((Parentheses) t).Name != '(')
+                throw new SyntaxErrorException("Expected ( received: " + t, t);
+
             Operand1 = Create(sTokens);
             Operand1.Parse(sTokens);
-            Operator = sTokens.Pop().ToString();
+
+            t = sTokens.Pop();
+            if (!(t is Operator))
+                throw new SyntaxErrorException("Expected operator received: " + t, t);
+            Operator = t.ToString();
+
             Operand2 = Create(sTokens);
             Operand2.Parse(sTokens);
-            sTokens.Pop(); // )
+
+            t = sTokens.Pop(); // )
+            if (!(t is Parentheses) || ((Parentheses) t).Name != ')')
+                throw new SyntaxErrorException("Expected ) received: " + t, t);
         }
     }
 }

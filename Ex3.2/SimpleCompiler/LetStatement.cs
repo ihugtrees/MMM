@@ -20,16 +20,22 @@ namespace SimpleCompiler
         {
             //We check that the first token is "let"
             Token tFunc = sTokens.Pop();
-            if (!(tFunc is Statement) || ((Statement)tFunc).Name != "let")
+            if (!(tFunc is Statement) || ((Statement) tFunc).Name != "let")
                 throw new SyntaxErrorException("Expected while received: " + tFunc, tFunc);
-            
-            Expression var = Expression.Create(sTokens); // check if number
+
+            Expression var = Expression.Create(sTokens); // identifier
             var.Parse(sTokens);
-            sTokens.Pop();// = 
-            Expression expr = Expression.Create(sTokens); // after the =
-            expr.Parse(sTokens);
-
+            Variable = var.ToString();
+            
+            Token t = sTokens.Pop(); // = 
+            if (!(t is Operator) || ((Operator) t).Name != '=')
+                throw new SyntaxErrorException("Expected = received: " + t, t);
+            Value = Expression.Create(sTokens); // expression
+            Value.Parse(sTokens);
+            
+            t = sTokens.Pop(); // ;
+            if (!(t is Separator) || ((Separator) t).Name != ';')
+                throw new SyntaxErrorException("Expected ; received: " + t, t);
         }
-
     }
 }
