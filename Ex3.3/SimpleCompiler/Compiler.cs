@@ -50,7 +50,18 @@ namespace SimpleCompiler
         public List<string> GenerateCode(LetStatement aSimple, Dictionary<string, int> dSymbolTable)
         {
             List<string> lAssembly = new List<string>();
+            if (!dSymbolTable.ContainsKey(aSimple.Variable) && aSimple.Variable.First() != '_')
+            {
+                throw new Exception("No such declaration in symbol table");
+            }
+
             //add here code for computing a single let statement containing only a simple expression
+            lAssembly.Add("@" + aSimple.Value);
+            lAssembly.Add("D=A");
+            lAssembly.Add("@RESULT");
+            lAssembly.Add("M=D");
+            lAssembly.Add("@LOCAL");
+            lAssembly.Add("M=D");
             return lAssembly;
         }
 
@@ -66,12 +77,26 @@ namespace SimpleCompiler
             //var int y;
             //the resulting table should bae x=0,y=1,_1=2
             //throw an exception if a var with the same name is defined more than once
-            
-            foreach(KeyValuePair<string, int> entry in dTable)
+
+            int counter = 0;
+            foreach (var var in lDeclerations)
             {
-                
+                if (var.Name[0] != '_')
+                {
+                    dTable.Add(var.Name, counter);
+                    counter++;
+                }
             }
-            
+
+            foreach (var var in lDeclerations)
+            {
+                if (var.Name[0] == '_')
+                {
+                    dTable.Add(var.Name, counter);
+                    counter++;
+                }
+            }
+
             return dTable;
         }
 
@@ -115,7 +140,7 @@ namespace SimpleCompiler
         public List<Token> Tokenize(string sLine, int iLine)
         {
             List<Token> lTokens = new List<Token>();
-            
+
             if (sLine.Contains("//")) // handle comments and empty lines
             {
                 int indexOfComment = sLine.IndexOf("//");
@@ -126,7 +151,7 @@ namespace SimpleCompiler
 
                 sLine = sLine.Substring(0, indexOfComment);
             }
-            
+
             var myList = new List<char>();
             myList.AddRange(Token.Parentheses);
             myList.AddRange(Token.Separators);
@@ -134,7 +159,7 @@ namespace SimpleCompiler
             myList.Add(' ');
             myList.Add('\t');
             char[] delimiters = myList.ToArray();
-            
+
             List<string> tokens = Split(sLine, delimiters);
             int posIndex = 0;
 

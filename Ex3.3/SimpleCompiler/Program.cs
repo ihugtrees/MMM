@@ -153,7 +153,10 @@ namespace SimpleCompiler
 
         static void Main(string[] args)
         {
+            Test1();
+            Test2();
             Test3();
+            Test4();
             //TestParseAndErrors();
         }
 
