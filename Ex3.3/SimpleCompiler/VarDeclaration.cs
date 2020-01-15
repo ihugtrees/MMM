@@ -19,6 +19,12 @@ namespace SimpleCompiler
 
         }
 
+        public VarDeclaration(string sType, string sName)
+        {
+            Type = GetVarType(sType);
+            Name = sName;
+        }
+
         public VarDeclaration(Token tType, Token tName)
         {
             SetTypeAndName(tType, tName);
@@ -71,6 +77,20 @@ namespace SimpleCompiler
         public override string ToString()
         {
             return "var " + Type + " " + Name + ";";
+        }
+
+        public override bool Equals(object obj)
+        {
+            if(obj is VarDeclaration)
+            {
+                VarDeclaration var = (VarDeclaration)obj;
+                return var.Type == Type && var.Name == Name;
+            }
+            return false;
+        }
+        public override int GetHashCode()
+        {
+            return ToString().GetHashCode();
         }
     }
 }
