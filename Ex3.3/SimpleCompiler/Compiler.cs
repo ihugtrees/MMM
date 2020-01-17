@@ -50,19 +50,96 @@ namespace SimpleCompiler
         public List<string> GenerateCode(LetStatement aSimple, Dictionary<string, int> dSymbolTable)
         {
             List<string> lAssembly = new List<string>();
-            if (!dSymbolTable.ContainsKey(aSimple.Variable) && aSimple.Variable.First() != '_')
+            if (!dSymbolTable.ContainsKey(aSimple.Variable))
             {
                 throw new Exception("No such declaration in symbol table");
             }
 
             //add here code for computing a single let statement containing only a simple expression
-            lAssembly.Add("@" + aSimple.Value);
-            lAssembly.Add("D=A");
-            lAssembly.Add("@RESULT");
-            lAssembly.Add("M=D");
-            lAssembly.Add("@LOCAL");
-            lAssembly.Add("M=D");
+            if (aSimple.Value.GetType() == typeof(NumericExpression))
+            {
+                lAssembly.Add("@" + aSimple.Value);
+                lAssembly.Add("D=A");
+                lAssembly.AddRange(resultToLocal(aSimple,dSymbolTable));
+            }
+            else if (aSimple.Value.GetType() == typeof(BinaryOperationExpression))
+            {
+                BinaryOperationExpression exp = (BinaryOperationExpression) aSimple.Value;
+                lAssembly.AddRange(CopyToOperand1(exp.Operand1));
+                lAssembly.AddRange(CopyToOperand2(exp.Operand2));
+                lAssembly.Add("@OPERAND1");
+                lAssembly.Add("D=M");
+                lAssembly.Add("@OPERAND2");
+                lAssembly.Add("D=D"+exp.Operator+"M");
+                lAssembly.AddRange(resultToLocal(aSimple,dSymbolTable));
+            }
+
             return lAssembly;
+        }
+
+        private List<string> resultToLocal(LetStatement aSimple, Dictionary<string, int> dSymbolTable)
+        {
+            List<string> assembly = new List<string>();
+            
+            assembly.Add("@RESULT");
+            assembly.Add("M=D");
+            assembly.Add("@" + aSimple.Variable);
+            assembly.Add("M=D");
+            assembly.Add("@LCL");
+            assembly.Add("D=M");
+            assembly.Add("@" + dSymbolTable[aSimple.Variable]);
+            assembly.Add("D=D+A");
+            assembly.Add("@INDEX");
+            assembly.Add("M=D");
+            assembly.Add("@RESULT");
+            assembly.Add("D=M");
+            assembly.Add("@INDEX");
+            assembly.Add("A=M");
+            assembly.Add("M=D");
+
+            return assembly;
+        }
+
+        private List<string> CopyToOperand1(Expression operand1)
+        {
+            List<string> assembly = new List<string>();
+            if (operand1.GetType() == typeof(NumericExpression))
+            {
+                assembly.Add("@" + operand1);
+                assembly.Add("D=A");
+                assembly.Add("@OPERAND1");
+                assembly.Add("M=D");
+            }
+            else
+            {
+                assembly.Add("@" + operand1);
+                assembly.Add("D=M");
+                assembly.Add("@OPERAND1");
+                assembly.Add("M=D");
+            }
+
+            return assembly;
+        }
+
+        private List<string> CopyToOperand2(Expression operand2)
+        {
+            List<string> assembly = new List<string>();
+            if (operand2.GetType() == typeof(NumericExpression))
+            {
+                assembly.Add("@" + operand2);
+                assembly.Add("D=A");
+                assembly.Add("@OPERAND2");
+                assembly.Add("M=D");
+            }
+            else
+            {
+                assembly.Add("@" + operand2);
+                assembly.Add("D=M");
+                assembly.Add("@OPERAND2");
+                assembly.Add("M=D");
+            }
+
+            return assembly;
         }
 
 
@@ -112,8 +189,23 @@ namespace SimpleCompiler
 
         public List<LetStatement> SimplifyExpressions(LetStatement s, List<VarDeclaration> lVars)
         {
+            List<LetStatement> statements = new List<LetStatement>();
             //add here code to simply expressins in a statement. 
             //add var declarations for artificial variables.
+
+            int counter = 1;
+            if (s.Value.GetType() == typeof(BinaryOperationExpression))
+            {
+                BinaryOperationExpression ss = (BinaryOperationExpression) s.Value;
+                if (ss.Operand1.GetType() == typeof(BinaryOperationExpression))
+                {
+                    LetStatement l = new LetStatement();
+                    l.Variable = "_"+counter;
+                    counter++;
+                }
+                
+            }
+            
             return null;
         }
 
