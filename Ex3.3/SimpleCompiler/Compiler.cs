@@ -60,18 +60,18 @@ namespace SimpleCompiler
             {
                 lAssembly.Add("@" + aSimple.Value);
                 lAssembly.Add("D=A");
-                lAssembly.AddRange(resultToLocal(aSimple,dSymbolTable));
+                lAssembly.AddRange(resultToLocal(aSimple, dSymbolTable));
             }
             else if (aSimple.Value.GetType() == typeof(BinaryOperationExpression))
             {
                 BinaryOperationExpression exp = (BinaryOperationExpression) aSimple.Value;
-                lAssembly.AddRange(CopyToOperand1(exp.Operand1));
-                lAssembly.AddRange(CopyToOperand2(exp.Operand2));
+                lAssembly.AddRange(CopyToOperand1(exp.Operand1, dSymbolTable));
+                lAssembly.AddRange(CopyToOperand2(exp.Operand2, dSymbolTable));
                 lAssembly.Add("@OPERAND1");
                 lAssembly.Add("D=M");
                 lAssembly.Add("@OPERAND2");
-                lAssembly.Add("D=D"+exp.Operator+"M");
-                lAssembly.AddRange(resultToLocal(aSimple,dSymbolTable));
+                lAssembly.Add("D=D" + exp.Operator + "M");
+                lAssembly.AddRange(resultToLocal(aSimple, dSymbolTable));
             }
 
             return lAssembly;
@@ -80,7 +80,7 @@ namespace SimpleCompiler
         private List<string> resultToLocal(LetStatement aSimple, Dictionary<string, int> dSymbolTable)
         {
             List<string> assembly = new List<string>();
-            
+
             assembly.Add("@RESULT");
             assembly.Add("M=D");
             assembly.Add("@" + aSimple.Variable);
@@ -89,18 +89,32 @@ namespace SimpleCompiler
             assembly.Add("D=M");
             assembly.Add("@" + dSymbolTable[aSimple.Variable]);
             assembly.Add("D=D+A");
-            assembly.Add("@INDEX");
+            assembly.Add("@ADDRESS");
             assembly.Add("M=D");
             assembly.Add("@RESULT");
             assembly.Add("D=M");
-            assembly.Add("@INDEX");
+            assembly.Add("@ADDRESS");
             assembly.Add("A=M");
             assembly.Add("M=D");
 
             return assembly;
         }
 
-        private List<string> CopyToOperand1(Expression operand1)
+        private List<string> getLocalVarValue(string var, Dictionary<string, int> dSymbolTable)
+        {
+            List<string> assembly = new List<string>();
+
+            assembly.Add("@LCL");
+            assembly.Add("D=M");
+            assembly.Add("@" + dSymbolTable[var]);
+            assembly.Add("D=D+A");
+            assembly.Add("@ADDRESS");
+            assembly.Add("M=D");
+
+            return assembly;
+        }
+
+        private List<string> CopyToOperand1(Expression operand1, Dictionary<string, int> dSymbolTable)
         {
             List<string> assembly = new List<string>();
             if (operand1.GetType() == typeof(NumericExpression))
@@ -112,7 +126,10 @@ namespace SimpleCompiler
             }
             else
             {
-                assembly.Add("@" + operand1);
+                assembly.AddRange(getLocalVarValue(operand1.ToString(),dSymbolTable));
+                assembly.Add("@ADDRESS");
+                assembly.Add("D=M");
+                assembly.Add("A=D");
                 assembly.Add("D=M");
                 assembly.Add("@OPERAND1");
                 assembly.Add("M=D");
@@ -121,7 +138,7 @@ namespace SimpleCompiler
             return assembly;
         }
 
-        private List<string> CopyToOperand2(Expression operand2)
+        private List<string> CopyToOperand2(Expression operand2, Dictionary<string, int> dSymbolTable)
         {
             List<string> assembly = new List<string>();
             if (operand2.GetType() == typeof(NumericExpression))
@@ -133,7 +150,10 @@ namespace SimpleCompiler
             }
             else
             {
-                assembly.Add("@" + operand2);
+                assembly.AddRange(getLocalVarValue(operand2.ToString(),dSymbolTable));
+                assembly.Add("@ADDRESS");
+                assembly.Add("D=M");
+                assembly.Add("A=D");
                 assembly.Add("D=M");
                 assembly.Add("@OPERAND2");
                 assembly.Add("M=D");
@@ -194,19 +214,34 @@ namespace SimpleCompiler
             //add var declarations for artificial variables.
 
             int counter = 1;
+            LetStatement left = new LetStatement();
+            LetStatement right = new LetStatement();
+            LetStatement combined = new LetStatement();
+            
             if (s.Value.GetType() == typeof(BinaryOperationExpression))
             {
-                BinaryOperationExpression ss = (BinaryOperationExpression) s.Value;
-                if (ss.Operand1.GetType() == typeof(BinaryOperationExpression))
+                BinaryOperationExpression value = (BinaryOperationExpression) s.Value;
+                if (value.Operand1.GetType() == typeof(BinaryOperationExpression))
                 {
-                    LetStatement l = new LetStatement();
-                    l.Variable = "_"+counter;
+                    left.Variable = "_" + counter;
+                    left.Value = value.Operand1;
+                    statements.Add(left);
                     counter++;
                 }
-                
+                if (value.Operand2.GetType() == typeof(BinaryOperationExpression))
+                {
+                    right.Variable = "_" + counter;
+                    right.Value = value.Operand1;
+                    statements.Add(right);
+                    counter++;
+                }
+                combined.Variable = "_" + counter;
+                combined.Value = value.Operand1;
+                statements.Add(combined);
+                counter++;
             }
-            
-            return null;
+
+            return statements;
         }
 
         public List<LetStatement> SimplifyExpressions(List<LetStatement> ls, List<VarDeclaration> lVars)
