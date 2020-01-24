@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -52,7 +53,7 @@ namespace SimpleCompiler
             List<string> lAssembly = new List<string>();
             if (!dSymbolTable.ContainsKey(aSimple.Variable))
             {
-                throw new Exception("No such declaration in symbol table");
+                throw new SyntaxErrorException("No such declaration in symbol table",new Token());
             }
 
             //add here code for computing a single let statement containing only a simple expression
@@ -60,6 +61,22 @@ namespace SimpleCompiler
             {
                 lAssembly.Add("@" + aSimple.Value);
                 lAssembly.Add("D=A");
+                lAssembly.Add("@RESULT");
+                lAssembly.Add("M=D");
+                lAssembly.AddRange(resultToLocal(aSimple, dSymbolTable));
+            }
+            else if (aSimple.Value.GetType() == typeof(VariableExpression))
+            {
+                lAssembly.Add("@LCL");
+                lAssembly.Add("D=M");
+                lAssembly.Add("@" + dSymbolTable[aSimple.Value.ToString()]);
+                lAssembly.Add("D=D+A");
+                lAssembly.Add("@ADDRESS");
+                lAssembly.Add("M=D");
+                lAssembly.Add("A=M");
+                lAssembly.Add("D=M");
+                lAssembly.Add("@RESULT");
+                lAssembly.Add("M=D");
                 lAssembly.AddRange(resultToLocal(aSimple, dSymbolTable));
             }
             else if (aSimple.Value.GetType() == typeof(BinaryOperationExpression))
@@ -71,6 +88,8 @@ namespace SimpleCompiler
                 lAssembly.Add("D=M");
                 lAssembly.Add("@OPERAND2");
                 lAssembly.Add("D=D" + exp.Operator + "M");
+                lAssembly.Add("@RESULT");
+                lAssembly.Add("M=D");
                 lAssembly.AddRange(resultToLocal(aSimple, dSymbolTable));
             }
 
@@ -79,25 +98,21 @@ namespace SimpleCompiler
 
         private List<string> resultToLocal(LetStatement aSimple, Dictionary<string, int> dSymbolTable)
         {
-            List<string> assembly = new List<string>();
+            List<string> lAssembly = new List<string>();
 
-            assembly.Add("@RESULT");
-            assembly.Add("M=D");
-            assembly.Add("@" + aSimple.Variable);
-            assembly.Add("M=D");
-            assembly.Add("@LCL");
-            assembly.Add("D=M");
-            assembly.Add("@" + dSymbolTable[aSimple.Variable]);
-            assembly.Add("D=D+A");
-            assembly.Add("@ADDRESS");
-            assembly.Add("M=D");
-            assembly.Add("@RESULT");
-            assembly.Add("D=M");
-            assembly.Add("@ADDRESS");
-            assembly.Add("A=M");
-            assembly.Add("M=D");
+            lAssembly.Add("@LCL");
+            lAssembly.Add("D=M");
+            lAssembly.Add("@" + dSymbolTable[aSimple.Variable]);
+            lAssembly.Add("D=D+A");
+            lAssembly.Add("@ADDRESS");
+            lAssembly.Add("M=D");
+            lAssembly.Add("@RESULT");
+            lAssembly.Add("D=M");
+            lAssembly.Add("@ADDRESS");
+            lAssembly.Add("A=M");
+            lAssembly.Add("M=D");
 
-            return assembly;
+            return lAssembly;
         }
 
         private List<string> getLocalVarValue(string var, Dictionary<string, int> dSymbolTable)
@@ -126,10 +141,9 @@ namespace SimpleCompiler
             }
             else
             {
-                assembly.AddRange(getLocalVarValue(operand1.ToString(),dSymbolTable));
+                assembly.AddRange(getLocalVarValue(operand1.ToString(), dSymbolTable));
                 assembly.Add("@ADDRESS");
-                assembly.Add("D=M");
-                assembly.Add("A=D");
+                assembly.Add("A=M");
                 assembly.Add("D=M");
                 assembly.Add("@OPERAND1");
                 assembly.Add("M=D");
@@ -150,10 +164,9 @@ namespace SimpleCompiler
             }
             else
             {
-                assembly.AddRange(getLocalVarValue(operand2.ToString(),dSymbolTable));
+                assembly.AddRange(getLocalVarValue(operand2.ToString(), dSymbolTable));
                 assembly.Add("@ADDRESS");
-                assembly.Add("D=M");
-                assembly.Add("A=D");
+                assembly.Add("A=M");
                 assembly.Add("D=M");
                 assembly.Add("@OPERAND2");
                 assembly.Add("M=D");
@@ -180,6 +193,10 @@ namespace SimpleCompiler
             {
                 if (var.Name[0] != '_')
                 {
+                    if (dTable.ContainsKey(var.Name))
+                    {
+                        throw new SyntaxErrorException("variable already exists",new Token());
+                    }
                     dTable.Add(var.Name, counter);
                     counter++;
                 }
@@ -189,6 +206,10 @@ namespace SimpleCompiler
             {
                 if (var.Name[0] == '_')
                 {
+                    if (dTable.ContainsKey(var.Name))
+                    {
+                        throw new SyntaxErrorException("variable already exists",new Token());
+                    }
                     dTable.Add(var.Name, counter);
                     counter++;
                 }
@@ -207,41 +228,143 @@ namespace SimpleCompiler
             return lAssembly;
         }
 
+
+        public static Int32 counter = 1;
+
         public List<LetStatement> SimplifyExpressions(LetStatement s, List<VarDeclaration> lVars)
         {
             List<LetStatement> statements = new List<LetStatement>();
+            recursiveLet(s, lVars, statements);
+
             //add here code to simply expressins in a statement. 
             //add var declarations for artificial variables.
 
-            int counter = 1;
-            LetStatement left = new LetStatement();
-            LetStatement right = new LetStatement();
-            LetStatement combined = new LetStatement();
-            
+            // LetStatement left = new LetStatement();
+            // LetStatement right = new LetStatement();
+            // LetStatement combined = new LetStatement();
+            // combined.Variable = s.Variable;
+            //
+            // if (s.Value.GetType() == typeof(BinaryOperationExpression))
+            // {
+            //     BinaryOperationExpression value = (BinaryOperationExpression) s.Value;
+            //
+            //     BinaryOperationExpression binExp = new BinaryOperationExpression();
+            //     binExp.Operator = value.Operator;
+            //     VariableExpression var1 = new VariableExpression();
+            //     VariableExpression var2 = new VariableExpression();
+            //
+            //     if (value.Operand1.GetType() == typeof(BinaryOperationExpression))
+            //     {
+            //         string virtualVar = "_" + counter;
+            //         lVars.Add(new VarDeclaration("int", virtualVar));
+            //         left.Variable = virtualVar;
+            //         left.Value = value.Operand1;
+            //         counter++;
+            //
+            //         var1.Name = virtualVar;
+            //         binExp.Operand1 = var1;
+            //
+            //         recursiveLet(left, lVars, statements, counter);
+            //         //statements.Add(left);
+            //     }
+            //     else
+            //     {
+            //         binExp.Operand1 = value.Operand1;
+            //     }
+            //
+            //     if (value.Operand2.GetType() == typeof(BinaryOperationExpression))
+            //     {
+            //         string virtualVar = "_" + counter;
+            //         lVars.Add(new VarDeclaration("int", virtualVar));
+            //         right.Variable = virtualVar;
+            //         right.Value = value.Operand2;
+            //         counter++;
+            //         
+            //         var2.Name = virtualVar;
+            //         binExp.Operand2 = var2;
+            //
+            //         recursiveLet(right, lVars, statements, counter);
+            //         //statements.Add(right);
+            //     }
+            //     else
+            //     {
+            //         binExp.Operand2 = value.Operand2;
+            //     }
+            //
+            //     combined.Value = binExp;
+            //     statements.Add(combined);
+            // }
+            // else
+            // {
+            //     statements.Add(s);
+            // }
+
+            return statements;
+        }
+
+        public void recursiveLet(LetStatement s, List<VarDeclaration> lVars, List<LetStatement> statements)
+        {
             if (s.Value.GetType() == typeof(BinaryOperationExpression))
             {
                 BinaryOperationExpression value = (BinaryOperationExpression) s.Value;
+
+                LetStatement left = new LetStatement();
+                LetStatement right = new LetStatement();
+                LetStatement combined = new LetStatement();
+
+                combined.Variable = s.Variable;
+                BinaryOperationExpression binExp = new BinaryOperationExpression();
+                binExp.Operator = value.Operator;
+                VariableExpression var1 = new VariableExpression();
+                VariableExpression var2 = new VariableExpression();
+
                 if (value.Operand1.GetType() == typeof(BinaryOperationExpression))
                 {
-                    left.Variable = "_" + counter;
+                    string virtualVar = "_" + counter;
+                    lVars.Add(new VarDeclaration("int", virtualVar));
+                    left.Variable = virtualVar;
                     left.Value = value.Operand1;
-                    statements.Add(left);
                     counter++;
+
+                    recursiveLet(left, lVars, statements);
+
+                    var1.Name = left.Variable;
+                    binExp.Operand1 = var1;
+
+                    //statements.Add(left);
                 }
+                else
+                {
+                    binExp.Operand1 = value.Operand1;
+                }
+
                 if (value.Operand2.GetType() == typeof(BinaryOperationExpression))
                 {
-                    right.Variable = "_" + counter;
-                    right.Value = value.Operand1;
-                    statements.Add(right);
+                    string virtualVar = "_" + counter;
+                    lVars.Add(new VarDeclaration("int", virtualVar));
+                    right.Variable = virtualVar;
+                    right.Value = value.Operand2;
                     counter++;
-                }
-                combined.Variable = "_" + counter;
-                combined.Value = value.Operand1;
-                statements.Add(combined);
-                counter++;
-            }
 
-            return statements;
+                    recursiveLet(right, lVars, statements);
+
+                    var2.Name = right.Variable;
+                    binExp.Operand2 = var2;
+
+                    //statements.Add(right);
+                }
+                else
+                {
+                    binExp.Operand2 = value.Operand2;
+                }
+
+                combined.Value = binExp;
+                statements.Add(combined);
+            }
+            else
+            {
+                statements.Add(s);
+            }
         }
 
         public List<LetStatement> SimplifyExpressions(List<LetStatement> ls, List<VarDeclaration> lVars)

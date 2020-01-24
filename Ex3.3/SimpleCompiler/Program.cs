@@ -68,6 +68,32 @@ namespace SimpleCompiler
             if (cpu.M[22] != 25)
                 Console.WriteLine("BUGBUG");
         }
+        
+        static void Test5()
+        {
+            Compiler c = new Compiler();
+            List<string> lVars = new List<string>();
+            lVars.Add("var int x1;");
+            lVars.Add("var int x2;");
+            lVars.Add("var int x3;");
+            List<VarDeclaration> vars = c.ParseVarDeclarations(lVars);
+
+            List<string> lAssignments = new List<string>();
+            lAssignments.Add("let x1 = 7;");
+            lAssignments.Add("let x2 = 5;");
+            lAssignments.Add("let x3 = x1;");
+
+            List<LetStatement> ls = c.ParseAssignments(lAssignments);
+
+
+            List<string> lAssembly = c.GenerateCode(ls, vars);
+            CPUEmulator cpu = new CPUEmulator();
+            InitLCL(lAssembly);
+            cpu.Code = lAssembly;
+            cpu.Run(1000, false);
+            if (cpu.M[22] != 25)
+                Console.WriteLine("BUGBUG");
+        }
         static void Test3()
         {
             Compiler c = new Compiler();
@@ -106,8 +132,8 @@ namespace SimpleCompiler
 
 
             List<string> lAssignments = new List<string>();
-            lAssignments.Add("let x1 = 1;");
-            lAssignments.Add("let x2 = 3;");
+            //lAssignments.Add("let x1 = 1;");
+            //lAssignments.Add("let x2 = 3;");
             lAssignments.Add("let x3 = (((x1 + 1) - 4) + ((x2 + x1) - 2));");
             lAssignments.Add("let x4 = ((x2 + x3) - (x2 -7));");
             lAssignments.Add("let x5 = (1000 - ((x1 + (((((x2 + x3) - x4) + x1) - x2) + x3)) - ((x1 - x2) + x4)));");
@@ -126,11 +152,11 @@ namespace SimpleCompiler
             List<LetStatement> lSimple = c.SimplifyExpressions(ls, vars);
 
             Dictionary<string, int> dValues2 = new Dictionary<string, int>();
-            dValues["x1"] = 0;
-            dValues["x2"] = 0;
-            dValues["x3"] = 0;
-            dValues["x4"] = 0;
-            dValues["x5"] = 0;
+            dValues2["x1"] = 0;
+            dValues2["x2"] = 0;
+            dValues2["x3"] = 0;
+            dValues2["x4"] = 0;
+            dValues2["x5"] = 0;
 
             cpu.Compute(lSimple, dValues2);
 
@@ -155,11 +181,10 @@ namespace SimpleCompiler
         {
             //Test1();
             //Test2();
-            Test3();
-            Test4();
+            //Test3();
+            //Test4();
+            Test5();
             //TestParseAndErrors();
         }
-
- 
-     }
+    }
 }
